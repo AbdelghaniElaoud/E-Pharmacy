@@ -1,4 +1,4 @@
-package com.epharmacy.app.dto;
+package com.epharmacy.app.dto.orderItem;
 
 import lombok.Getter;
 import lombok.Setter;
