@@ -1,9 +1,7 @@
 package com.epharmacy.app.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.Set;
@@ -12,6 +10,9 @@ import java.util.Set;
 @Setter
 @Getter
 @ToString
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "pharmacist")
 @PrimaryKeyJoinColumn(name = "id")
 public class Pharmacist extends User implements Serializable {

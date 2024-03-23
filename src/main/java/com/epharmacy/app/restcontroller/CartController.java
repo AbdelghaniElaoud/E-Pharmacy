@@ -34,7 +34,7 @@ public class CartController {
         return CartMapper.INSTANCE.convert(cartService.createNewCart(cartItem.getCustomerId()));
     }
     @GetMapping("/{id}")
-    public CartDTO getCard(@PathVariable Long id){
+    public CartDTO getCart(@PathVariable Long id){
         Optional<Cart> cartOptional = cartService.findById(id);
         if (cartOptional.isEmpty()){
             throw new CustomerNotFoundException(id);

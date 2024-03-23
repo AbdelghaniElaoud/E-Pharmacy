@@ -18,10 +18,8 @@ public class OrderDTO {
     private String address;
     private OrderStatus orderStatus;
     private PaymentStatus paymentStatus;
-    private Long customerId;
-    private Long deliveryManId;
-    private Long pharmacistId;
+    /*private Long customerId;
     private Set<Long> prescriptionIds;
     private Set<Long> orderItemIds;
-    private List<Long> reviewIds;
+    private List<Long> reviewIds;*/
 }

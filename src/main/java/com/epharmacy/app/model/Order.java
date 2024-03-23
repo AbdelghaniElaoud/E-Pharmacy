@@ -2,18 +2,21 @@ package com.epharmacy.app.model;
 
 import com.epharmacy.app.enums.OrderStatus;
 import com.epharmacy.app.enums.PaymentStatus;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
 @Entity
 @Setter
 @Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @ToString
 @Table(name = "orders")
 public class Order implements Serializable {
@@ -22,7 +25,7 @@ public class Order implements Serializable {
     private Long id;
 
     @Column(nullable = false)
-    private Float totalPrice;
+    private BigDecimal totalPrice;
 
     @Column(nullable = false)
     private String address;
@@ -38,9 +41,9 @@ public class Order implements Serializable {
     @ToString.Exclude
     private Set<Prescription> prescriptions;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany/*(mappedBy = "order")*/
     @ToString.Exclude
-    private Set<OrderItem> orderItems;
+    private List<OrderItem> orderItems;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)

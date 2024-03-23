@@ -1,9 +1,7 @@
 package com.epharmacy.app.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.List;
@@ -13,6 +11,9 @@ import java.util.Set;
 @Setter
 @Getter
 @ToString
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "delivery_man")
 @PrimaryKeyJoinColumn(name = "id")
 public class DeliveryMan extends User implements Serializable {
@@ -26,4 +27,5 @@ public class DeliveryMan extends User implements Serializable {
     @OneToMany(mappedBy = "deliveryMan")
     @ToString.Exclude
     private List<Review> reviews ;
+
 }
