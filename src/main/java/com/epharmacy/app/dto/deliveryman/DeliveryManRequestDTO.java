@@ -1,4 +1,4 @@
-package com.epharmacy.app.dto.deliveryMan;
+package com.epharmacy.app.dto.deliveryman;
 
 import lombok.Getter;
 import lombok.Setter;

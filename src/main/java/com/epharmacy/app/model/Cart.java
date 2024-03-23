@@ -1,17 +1,20 @@
 package com.epharmacy.app.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Set;
 
 @Entity
 @Setter
 @Getter
 @ToString
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "cart")
 public class Cart implements Serializable {
     @Id
@@ -20,19 +23,18 @@ public class Cart implements Serializable {
     @Column(unique = true, nullable = false)
     private String code;
     @Column(name = "total_price", nullable = false)
-    private Double totalPrice;
-    @Column(nullable = false)
+    private BigDecimal totalPrice;
     private String address;
 
     @OneToMany(mappedBy = "cart")
     @ToString.Exclude
     private Set<Prescription> prescriptions;
 
-    @OneToMany(mappedBy = "cart")
+    @OneToMany(mappedBy = "cart", fetch = FetchType.EAGER)
     @ToString.Exclude
-    private Set<CartItem> cartItems;
+    private List<CartItem> entries;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
     @ToString.Exclude
     private Customer customer;

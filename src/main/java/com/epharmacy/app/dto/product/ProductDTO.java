@@ -1,10 +1,12 @@
 package com.epharmacy.app.dto.product;
 
+import com.epharmacy.app.dto.category.CategoryDTO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.Set;
+import java.math.BigDecimal;
+import java.util.List;
 
 @Getter
 @Setter
@@ -12,10 +14,10 @@ import java.util.Set;
 public class ProductDTO {
     private Long id;
     private String name;
-    private Float price;
+    private BigDecimal price;
     private String code;
     private boolean prescription;
     private Long stock;
-    private Long categoryId;
-    private Set<Long> imageIds;
+    private CategoryDTO category;
+    private List<String> medias;
 }

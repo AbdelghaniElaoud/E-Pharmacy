@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.springframework.context.annotation.EnableMBeanExport;
 
 import java.io.Serializable;
 
@@ -25,10 +24,10 @@ public class OrderItem implements Serializable {
     private Float basePrice;
     @Column(name = "total_price", nullable = false)
     private Float totalPrice;
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     @ToString.Exclude
-    private Product product_order;
+    private Product productOrder;
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)

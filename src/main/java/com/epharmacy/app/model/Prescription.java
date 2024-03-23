@@ -22,21 +22,21 @@ public class Prescription implements Serializable {
     @Column(nullable = false)
     private String doctor;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
     @ToString.Exclude
     private Customer customer;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id",nullable = false)
     @ToString.Exclude
     private Cart cart;
 
 
     @OneToOne(mappedBy = "prescription")
-    private Image image;
+    private Media media;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     @ToString.Exclude
     private Order order;

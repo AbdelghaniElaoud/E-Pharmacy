@@ -1,17 +1,22 @@
 package com.epharmacy.app.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.io.Serializable;
-import java.util.Set;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Setter
 @Getter
 @ToString
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "product")
 public class Product implements Serializable {
     @Id
@@ -19,8 +24,11 @@ public class Product implements Serializable {
     private Long id;
     @Column(nullable = false)
     private String name;
+    @Lob
+    @Column(length = 1000)
+    private String description;
     @Column(nullable = false)
-    private Float price;
+    private BigDecimal price;
     @Column(unique = true, nullable = false)
     private String code;
     @Column(name = "require_prescription", nullable = false)
@@ -28,20 +36,18 @@ public class Product implements Serializable {
     @Column(nullable = false)
     private Long stock;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     @ToString.Exclude
     private Category category;
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany
     @ToString.Exclude
-    private Set<Image> images;
+    private List<Media> medias;
 
-    @OneToMany(mappedBy = "product_cart")
-    @ToString.Exclude
-    private Set<CartItem> cartItem;
-
-    @OneToMany(mappedBy = "product_order")
-    @ToString.Exclude
-    private Set<OrderItem> orderItems;
+    private boolean active;
+    @CreationTimestamp
+    private LocalDateTime creationAt;
+    @UpdateTimestamp
+    private LocalDateTime modifiedAt;
 }
