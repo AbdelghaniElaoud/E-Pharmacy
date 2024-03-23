@@ -42,17 +42,17 @@ public class Order implements Serializable {
     @ToString.Exclude
     private Set<OrderItem> orderItems;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
     @ToString.Exclude
     private Customer customer;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "delivery_man_id", nullable = false)
     @ToString.Exclude
     private DeliveryMan deliveryMan;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pharmacist_id", nullable = false)
     @ToString.Exclude
     private Pharmacist pharmacist;

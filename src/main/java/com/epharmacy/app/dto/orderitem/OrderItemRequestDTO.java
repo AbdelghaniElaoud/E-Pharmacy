@@ -1,15 +1,15 @@
-package com.epharmacy.app.dto.cartItem;
+package com.epharmacy.app.dto.orderitem;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class CartItemRequestDTO {
+public class OrderItemRequestDTO {
     private int quantity;
     private Double discount;
     private Float basePrice;
     private Float totalPrice;
     private Long productId;
-    private Long cartId;
+    private Long orderId;
 }

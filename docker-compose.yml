@@ -1,0 +1,12 @@
+version: "3.2"
+
+services:
+  mysql-epharmacy:
+    container_name: mysql-epharmacy
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+      MYSQL_ROOT_PASSWORD: "abdelghani2023@mysql"
+      MYSQL_DATABASE: epharmacy
