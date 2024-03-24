@@ -2,9 +2,10 @@ package com.epharmacy.app.service;
 
 import com.epharmacy.app.dto.address.AddressDTO;
 import com.epharmacy.app.dto.cartitem.CartItemRequestDTO;
+import com.epharmacy.app.dto.response.ResponseDTO;
 import com.epharmacy.app.exceptions.CartNotFoundException;
 import com.epharmacy.app.exceptions.CustomerNotFoundException;
-import com.epharmacy.app.exceptions.ProductNotFoundException;
+import com.epharmacy.app.mappers.CartMapper;
 import com.epharmacy.app.model.Cart;
 import com.epharmacy.app.model.CartItem;
 import com.epharmacy.app.model.Customer;
@@ -40,17 +41,18 @@ public class CartService {
         if (customerOptional.isEmpty()) {
             throw  new CustomerNotFoundException(customerId);
         }
-        Cart cart = Cart.builder().code(UUID.randomUUID().toString()).totalPrice(BigDecimal.ZERO).customer(customerOptional.get()).build();
+        Cart cart = Cart.builder().code(UUID.randomUUID().toString()).active(true).totalPrice(BigDecimal.ZERO).customer(customerOptional.get()).build();
         return save(cart);
     }
-    public Cart addToCart(Long cartId, Long productId, Long quantity){
+    public ResponseDTO addToCart(Long cartId, Long productId, Long quantity){
         Optional<Cart> cartOptional = findById(cartId);
+        ResponseDTO.ResponseDTOBuilder builder = ResponseDTO.builder();
         if (cartOptional.isEmpty()){
-            throw new CartNotFoundException(cartId);
+            return builder.errors(List.of("Could not find your cart")).build();
         }
         Optional<Product> productOptional = productService.findById(productId);
         if (productOptional.isEmpty()){
-            throw new ProductNotFoundException(productId);
+            return builder.errors(List.of("Could not find product " + productId)).build();
         }
         Cart cart = cartOptional.get();
         Product product = productOptional.get();
@@ -68,11 +70,11 @@ public class CartService {
         entries.add(savedCartItem);
         cart.setEntries(entries);
         cart.setTotalPrice(entries.stream().map(CartItem::getTotalPrice).reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2, RoundingMode.HALF_UP));
-        return repository.save(cart);
+        return builder.ok(true).content(CartMapper.INSTANCE.convert(save(cart))).build();
     }
 
     public Optional<Cart> findById(Long id){
-        return repository.findById(id);
+        return Optional.ofNullable(repository.findByActiveTrueAndId(id));
     }
 
     public Cart save(Cart item){
@@ -88,7 +90,7 @@ public class CartService {
         repository.deleteById(id);
     }
 
-    public Cart addToCart(CartItemRequestDTO cartItem) {
+    public ResponseDTO addToCart(CartItemRequestDTO cartItem) {
         return addToCart(cartItem.getCartId(), cartItem.getProductId(), cartItem.getQuantity());
     }
 

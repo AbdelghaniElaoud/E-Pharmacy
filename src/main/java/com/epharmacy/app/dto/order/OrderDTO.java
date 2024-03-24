@@ -1,12 +1,12 @@
 package com.epharmacy.app.dto.order;
 
+import com.epharmacy.app.dto.orderitem.OrderItemDTO;
 import com.epharmacy.app.enums.OrderStatus;
 import com.epharmacy.app.enums.PaymentStatus;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.Set;
 import java.util.List;
 
 @Getter
@@ -18,6 +18,8 @@ public class OrderDTO {
     private String address;
     private OrderStatus orderStatus;
     private PaymentStatus paymentStatus;
+    private Long newCartId;
+    private List<OrderItemDTO> entries;
     /*private Long customerId;
     private Set<Long> prescriptionIds;
     private Set<Long> orderItemIds;

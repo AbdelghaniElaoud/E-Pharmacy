@@ -2,7 +2,6 @@ package com.epharmacy.app.model;
 
 import com.epharmacy.app.enums.OrderStatus;
 import com.epharmacy.app.enums.PaymentStatus;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -43,7 +42,7 @@ public class Order implements Serializable {
 
     @OneToMany/*(mappedBy = "order")*/
     @ToString.Exclude
-    private List<OrderItem> orderItems;
+    private List<OrderItem> entries;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)

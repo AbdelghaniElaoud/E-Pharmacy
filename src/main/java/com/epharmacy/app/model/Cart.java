@@ -38,4 +38,6 @@ public class Cart implements Serializable {
     @JoinColumn(name = "customer_id", nullable = false)
     @ToString.Exclude
     private Customer customer;
+
+    private boolean active;
 }

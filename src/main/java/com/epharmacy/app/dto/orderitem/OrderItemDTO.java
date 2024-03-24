@@ -1,5 +1,6 @@
 package com.epharmacy.app.dto.orderitem;
 
+import com.epharmacy.app.dto.product.ProductDTO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -13,6 +14,6 @@ public class OrderItemDTO {
     private Double discount;
     private Float basePrice;
     private Float totalPrice;
-    private Long productId;
+    private ProductDTO product;
     private Long orderId;
 }

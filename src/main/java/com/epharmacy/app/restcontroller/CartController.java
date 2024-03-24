@@ -3,16 +3,19 @@ package com.epharmacy.app.restcontroller;
 import com.epharmacy.app.dto.address.AddressDTO;
 import com.epharmacy.app.dto.cart.CartDTO;
 import com.epharmacy.app.dto.cartitem.CartItemRequestDTO;
-import com.epharmacy.app.exceptions.CustomerNotFoundException;
+import com.epharmacy.app.dto.response.ResponseDTO;
 import com.epharmacy.app.mappers.CartMapper;
 import com.epharmacy.app.model.Cart;
 import com.epharmacy.app.service.CartService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/carts")
+@Slf4j
 public class CartController {
     private final CartService cartService;
 
@@ -22,23 +25,31 @@ public class CartController {
 
 
     @PostMapping("/add-item")
-    public CartDTO addToCart(@RequestBody CartItemRequestDTO cartItem){
-       return CartMapper.INSTANCE.convert(cartService.addToCart(cartItem));
+    public ResponseDTO addToCart(@RequestBody CartItemRequestDTO cartItem) {
+        return cartService.addToCart(cartItem);
     }
+
     @PostMapping("/add-address")
-    public CartDTO addAddress(@RequestBody AddressDTO addressDTO){
+    public CartDTO addAddress(@RequestBody AddressDTO addressDTO) {
         return CartMapper.INSTANCE.convert(cartService.addAddress(addressDTO));
     }
-    @PostMapping("")
-    public CartDTO create(@RequestBody CartItemRequestDTO cartItem){
-        return CartMapper.INSTANCE.convert(cartService.createNewCart(cartItem.getCustomerId()));
-    }
-    @GetMapping("/{id}")
-    public CartDTO getCart(@PathVariable Long id){
-        Optional<Cart> cartOptional = cartService.findById(id);
-        if (cartOptional.isEmpty()){
-            throw new CustomerNotFoundException(id);
+
+    @PostMapping
+    public ResponseDTO create(@RequestBody CartItemRequestDTO cartItem) {
+        try {
+            return ResponseDTO.builder().ok(true).content(CartMapper.INSTANCE.convert(cartService.createNewCart(cartItem.getCustomerId()))).build();
+        } catch (Exception e) {
+            log.error("Could not create cart for customer {}", cartItem.getCustomerId());
+            return ResponseDTO.builder().errors(List.of(e.getMessage())).build();
         }
-        return CartMapper.INSTANCE.convert(cartOptional.get());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseDTO getCart(@PathVariable Long id) {
+        Optional<Cart> cartOptional = cartService.findById(id);
+        if (cartOptional.isEmpty()) {
+            return ResponseDTO.builder().errors(List.of("Could not find cart for by id " + id)).build();
+        }
+        return ResponseDTO.builder().ok(true).content(CartMapper.INSTANCE.convert(cartOptional.get())).build();
     }
 }

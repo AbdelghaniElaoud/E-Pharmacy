@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 @Entity
 @Setter
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
@@ -29,13 +30,5 @@ public class OrderItem implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     @ToString.Exclude
-    private Product productOrder;
-
-    public OrderItem(Long quantity, BigDecimal discount, BigDecimal basePrice, BigDecimal totalPrice, Product productOrder) {
-        this.quantity = quantity;
-        this.discount = discount;
-        this.basePrice = basePrice;
-        this.totalPrice = totalPrice;
-        this.productOrder = productOrder;
-    }
+    private Product orderedProduct;
 }

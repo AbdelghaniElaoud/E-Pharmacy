@@ -1,38 +1,40 @@
 package com.epharmacy.app.service;
 
 import com.epharmacy.app.dto.order.OrderDTO;
+import com.epharmacy.app.dto.response.ResponseDTO;
 import com.epharmacy.app.enums.OrderStatus;
 import com.epharmacy.app.enums.PaymentStatus;
-import com.epharmacy.app.exceptions.CartNotFoundException;
 import com.epharmacy.app.exceptions.DeliveryManNotFoundException;
 import com.epharmacy.app.exceptions.PharmacistNotFoundException;
-import com.epharmacy.app.exceptions.PrescriptionNotFoundException;
 import com.epharmacy.app.mappers.OrderMapper;
 import com.epharmacy.app.model.*;
 import com.epharmacy.app.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
     private final OrderRepository orderRepository;
-    private final CartRepository cartRepository;
+    private final CartService cartService;
     private final DeliveryManRepository deliveryManRepository;
     private final PharmacistRepository pharmacistRepository;
     private final OrderItemRepository orderItemRepository;
-    @Autowired
-    private OrderMapper orderMapper;
+    private final PrescriptionRepository prescriptionRepository ;
 
 
     @Autowired
-    public OrderService(OrderRepository orderRepository, CartRepository cartRepository, DeliveryManRepository deliveryManRepository, PharmacistRepository pharmacistRepository, OrderItemRepository orderItemRepository) {
+    public OrderService(OrderRepository orderRepository, CartService cartService, DeliveryManRepository deliveryManRepository, PharmacistRepository pharmacistRepository, OrderItemRepository orderItemRepository, PrescriptionRepository prescriptionRepository) {
         this.orderRepository = orderRepository;
-        this.cartRepository = cartRepository;
+        this.cartService = cartService;
         this.deliveryManRepository = deliveryManRepository;
         this.pharmacistRepository = pharmacistRepository;
         this.orderItemRepository = orderItemRepository;
+        this.prescriptionRepository = prescriptionRepository;
     }
 
 
@@ -53,28 +55,30 @@ public class OrderService {
         orderRepository.deleteById(id);
     }
 
-    public OrderDTO placeOrder(Long cartId) {
-        Optional<Cart> cartOptional = cartRepository.findById(cartId);
+    public ResponseDTO placeOrder(Long cartId) {
+        Optional<Cart> cartOptional = cartService.findById(cartId);
+        ResponseDTO.ResponseDTOBuilder responseDTOBuilder = ResponseDTO.builder();
         if (cartOptional.isEmpty()){
-            throw new CartNotFoundException(cartId);
+            return responseDTOBuilder.ok(false).errors(List.of("Could not find your cart")).build();
         }
 
-        for (CartItem cartItem : cartOptional.get().getEntries()){
-            if(cartItem.getAddedProduct().isPrescription() && cartOptional.get().getPrescriptions().isEmpty()){
-                throw new PrescriptionNotFoundException(cartId);
+        Cart cart = cartOptional.get();
+        boolean noPrescription = cart.getPrescriptions().isEmpty();
+        for (CartItem cartItem : cart.getEntries()){
+            if(cartItem.getAddedProduct().isPrescription() && noPrescription){
+                return responseDTOBuilder.ok(false).errors(List.of("You have some products in your cart that need prescription, please attach to the cart.")).build();
             }
         }
 
-        List<OrderItem> orderItems = new ArrayList<>();
-
-        for (CartItem cartItem : cartOptional.get().getEntries()) {
-            OrderItem orderItem = new OrderItem(cartItem.getQuantity(), cartItem.getDiscount(), cartItem.getBasePrice(), cartItem.getTotalPrice(), cartItem.getAddedProduct());
-            orderItems.add(orderItem);
-            orderItemRepository.save(orderItem);
-        }
-
-
-        Set<Prescription> orderPrescriptions = new HashSet<>(cartOptional.get().getPrescriptions());
+        List<OrderItem> orderItems = cart.getEntries().stream().map(
+                cartItem -> orderItemRepository.save(OrderItem.builder()
+                        .orderedProduct(cartItem.getAddedProduct())
+                        .discount(cartItem.getDiscount())
+                        .quantity(cartItem.getQuantity())
+                        .totalPrice(cartItem.getTotalPrice())
+                        .basePrice(cartItem.getBasePrice())
+                        .build())
+        ).collect(Collectors.toCollection(ArrayList::new));
 
         DeliveryMan deliveryMan = deliveryManRepository.findAll().stream().findAny().orElse(null);
         Pharmacist pharmacist = pharmacistRepository.findAll().stream().findAny().orElse(null);
@@ -90,18 +94,27 @@ public class OrderService {
         pharmacistRepository.save(pharmacist);
 
         Order order = Order.builder()
-                .address(cartOptional.get().getCustomer().getAddress())
-                .orderItems(orderItems)
+                .address(cart.getCustomer().getAddress())
+                .entries(orderItems)
                 .orderStatus(OrderStatus.INIT)
-                .totalPrice(cartOptional.get().getTotalPrice())
+                .totalPrice(cart.getTotalPrice())
                 .paymentStatus(PaymentStatus.WAITING)
-                .customer(cartOptional.get().getCustomer())
+                .customer(cart.getCustomer())
+                .totalPrice(cart.getTotalPrice())
                 .deliveryMan(deliveryMan)
                 .pharmacist(pharmacist)
                 .build();
+        Order savedOrder = save(order);
+        savedOrder.setPrescriptions(cart.getPrescriptions().stream().map(prescription -> {
+            prescription.setId(null);
+            prescription.setOrder(savedOrder);
+            return prescriptionRepository.save(prescription);
+        }).collect(Collectors.toSet()));
 
-        order.setPrescriptions(orderPrescriptions);
-
-        return  orderMapper.toDTO(save(order));
+        cart.setActive(false);
+        cartService.save(cart);
+        OrderDTO dto = OrderMapper.INSTANCE.toDTO(save(savedOrder));
+        dto.setNewCartId(cartService.createNewCart(order.getCustomer().getId()).getId());
+        return responseDTOBuilder.content(dto).ok(true).build();
     }
 }

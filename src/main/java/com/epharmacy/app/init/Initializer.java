@@ -39,7 +39,7 @@ public class Initializer implements CommandLineRunner {
         anotherOneV1();
         Customer customer = createCustomer();
         Cart newCart = cartService.createNewCart(customer.getId());
-        cartService.addToCart(newCart.getId(), product.getId(), 2L);
+        //cartService.addToCart(newCart.getId(), product.getId(), 2L);
         createDeliveryMan();
         createPharmacist();
     }
@@ -68,7 +68,7 @@ public class Initializer implements CommandLineRunner {
                 .active(true)
                 .price(BigDecimal.valueOf(19.99).setScale(2, RoundingMode.HALF_UP))
                 .stock(100L)
-                .prescription(true)
+                .prescription(false)
                 .description("""
                         Avertissements
                         En raison de sa forte concentration, nous recommandons de toujours diluer ce produit avec une huile de base avant toute utilisation autre que l'aromathérapie.
