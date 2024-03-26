@@ -15,7 +15,7 @@ public class DeliveryManDTO {
     private String username;
     private String email;
     private String phone;
-    private Set<Long> orderIds;
-    private List<Long> reviewIds;
+    /*private Set<Long> orderIds;
+    private List<Long> reviewIds;*/
 
 }

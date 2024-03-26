@@ -66,7 +66,7 @@ public class CartService {
                 .build();
         CartItem savedCartItem = cartItemRepository.save(cartItem);
         List<CartItem> entries = new ArrayList<>(CollectionUtils.emptyIfNull(cart.getEntries()));
-        entries.removeIf(entry-> entry.getAddedProduct().getId().equals(productId));
+//        entries.removeIf(entry-> entry.getAddedProduct().getId().equals(productId));
         entries.add(savedCartItem);
         cart.setEntries(entries);
         cart.setTotalPrice(entries.stream().map(CartItem::getTotalPrice).reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2, RoundingMode.HALF_UP));

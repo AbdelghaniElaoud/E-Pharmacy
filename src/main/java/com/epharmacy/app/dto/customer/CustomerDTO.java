@@ -18,9 +18,9 @@ public class CustomerDTO {
     private String phone;
     private String address;
     private BigDecimal balance;
-    private Set<Long> prescriptionIds;
+    /*private Set<Long> prescriptionIds;
     private List<Long> cartIds;
     private Set<Long> orderIds;
-    private List<Long> reviewIds;
+    private List<Long> reviewIds;*/
 
 }

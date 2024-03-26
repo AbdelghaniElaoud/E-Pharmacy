@@ -1,5 +1,8 @@
 package com.epharmacy.app.dto.review;
 
+import com.epharmacy.app.dto.customer.CustomerDTO;
+import com.epharmacy.app.dto.deliveryman.DeliveryManDTO;
+import com.epharmacy.app.dto.order.OrderDTO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -11,7 +14,7 @@ public class ReviewDTO {
     private Integer id;
     private String label;
     private Integer rate;
-    private Long customerId;
-    private Long deliveryManId;
-    private Long orderId;
+    private CustomerDTO customer;
+    private DeliveryManDTO deliveryMan;
+    private OrderDTO order;
 }
