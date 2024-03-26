@@ -41,4 +41,8 @@ public class User implements Serializable {
     private UserRole role;
     @Enumerated(EnumType.STRING)
     private UserStatus status;
+
+    public String getFullName(){
+        return String.format("%s %s", this.firstName, this.lastName);
+    }
 }

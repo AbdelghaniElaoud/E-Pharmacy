@@ -1,41 +1,39 @@
 package com.epharmacy.app.restcontroller;
 
-import com.epharmacy.app.dto.review.ReviewDTO;
+import com.epharmacy.app.dto.review.ChangeStatusReviewRequestDTO;
+import com.epharmacy.app.dto.review.ResponseReviewDTO;
 import com.epharmacy.app.dto.review.ReviewRequestDTO;
 import com.epharmacy.app.mappers.ReviewMapper;
 import com.epharmacy.app.model.Review;
-import com.epharmacy.app.service.CustomerService;
-import com.epharmacy.app.service.DeliveryManService;
-import com.epharmacy.app.service.OrderService;
 import com.epharmacy.app.service.ReviewService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/reviews")
 public class ReviewController {
-
-
-    private final CustomerService customerService;
     private final ReviewService reviewService;
-    private final DeliveryManService deliveryManService;
-    private final OrderService orderService;
-
-
-    public ReviewController(CustomerService customerService, ReviewService reviewService, DeliveryManService deliveryManService, OrderService orderService) {
-        this.customerService = customerService;
+    public ReviewController(ReviewService reviewService) {
         this.reviewService = reviewService;
-        this.deliveryManService = deliveryManService;
-        this.orderService = orderService;
     }
 
 
     @PostMapping("")
-    public ReviewDTO addDReview(@RequestBody ReviewRequestDTO reviewRequestDTO) {
-        Review review = ReviewMapper.INSTANCE.toModel(reviewRequestDTO);
-        ReviewMapper.INSTANCE.afterToModel(reviewRequestDTO,review,customerService,deliveryManService,orderService);
-        Review reviewSaved = reviewService.save(review);
-        ReviewDTO reviewDTO = ReviewMapper.INSTANCE.toDTO(reviewSaved);
-        ReviewMapper.INSTANCE.afterToDTO(reviewSaved,reviewDTO);
-        return reviewDTO;
+    public ResponseEntity addDReview(@RequestBody ReviewRequestDTO reviewRequestDTO) {
+        reviewService.createNewReview(reviewRequestDTO);
+        return ResponseEntity.ok().build();
+    }
+    @GetMapping("/{deliveryManId}")
+    public List<ResponseReviewDTO> getAllValidReviews(@PathVariable Long deliveryManId) {
+        List<Review> reviews = reviewService.findAllValidReviewsForDeliveryMan(deliveryManId);
+        return  ReviewMapper.INSTANCE.toDTOResponseList(reviews);
+    }
+
+    @GetMapping("/change-status")
+    public ResponseEntity changeStatus(@RequestBody ChangeStatusReviewRequestDTO changeStatusReviewRequestDTO) {
+        reviewService.changeStatus(changeStatusReviewRequestDTO);
+        return ResponseEntity.ok().build();
     }
 }

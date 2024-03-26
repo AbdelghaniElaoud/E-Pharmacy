@@ -1,5 +1,6 @@
 package com.epharmacy.app.mappers;
 
+import com.epharmacy.app.dto.review.ResponseReviewDTO;
 import com.epharmacy.app.dto.review.ReviewDTO;
 import com.epharmacy.app.dto.review.ReviewRequestDTO;
 import com.epharmacy.app.exceptions.CustomerNotFoundException;
@@ -12,6 +13,7 @@ import com.epharmacy.app.service.OrderService;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
+import java.util.List;
 import java.util.Optional;
 
 @Mapper(
@@ -24,7 +26,10 @@ public interface ReviewMapper {
 
     ReviewDTO toDTO(Review source);
 
-    Review toModel(ReviewRequestDTO source);
+    @Mapping(target = "customer", ignore = true)
+    ResponseReviewDTO toDTOResponse(Review source);
+
+    Review toModel(ReviewRequestDTO source, @Context CustomerService customerService, @Context DeliveryManService deliveryManService, @Context OrderService orderService);
 
 
     @AfterMapping
@@ -32,6 +37,11 @@ public interface ReviewMapper {
         reviewDTO.setCustomer(CustomerMapper.INSTANCE.toDTO(review.getCustomer()));
         reviewDTO.setDeliveryMan(DeliveryManMapper.INSTANCE.toDTO(review.getDeliveryMan()));
         reviewDTO.setOrder(OrderMapper.INSTANCE.toDTO(review.getOrder()));
+    }
+
+    @AfterMapping
+    default void afterToDTOResponse(Review review, @MappingTarget ResponseReviewDTO reviewDTO) {
+        reviewDTO.setCustomer(review.getCustomer().getFullName());
     }
 
     @AfterMapping
@@ -55,5 +65,9 @@ public interface ReviewMapper {
         review.setCustomer(customerOptional.get());
         review.setDeliveryMan(deliveryManOptional.get());
         review.setOrder(orderOptional.get());
+        review.setStatus(reviewRequestDTO.getStatus());
+    }
+    default List<ResponseReviewDTO> toDTOResponseList(List<Review> items){
+        return items.stream().map(this::toDTOResponse).toList();
     }
 }

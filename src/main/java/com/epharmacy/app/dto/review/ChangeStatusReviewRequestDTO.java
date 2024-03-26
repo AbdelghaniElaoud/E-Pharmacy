@@ -6,12 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ReviewRequestDTO {
+public class ChangeStatusReviewRequestDTO {
     private Long id;
-    private String label;
-    private Integer rate;
-    private Long customerId;
-    private Long deliveryManId;
-    private Long orderId;
     private ReviewStatus status;
 }

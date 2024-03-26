@@ -36,4 +36,6 @@ public class Review implements Serializable {
     @ToString.Exclude
     private Order order;
 
+    private ReviewStatus status;
+
 }
