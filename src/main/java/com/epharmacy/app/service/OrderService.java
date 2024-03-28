@@ -25,16 +25,18 @@ public class OrderService {
     private final PharmacistRepository pharmacistRepository;
     private final OrderItemRepository orderItemRepository;
     private final PrescriptionRepository prescriptionRepository ;
+    private final ProductRepository productRepository ;
 
 
     @Autowired
-    public OrderService(OrderRepository orderRepository, CartService cartService, DeliveryManRepository deliveryManRepository, PharmacistRepository pharmacistRepository, OrderItemRepository orderItemRepository, PrescriptionRepository prescriptionRepository) {
+    public OrderService(OrderRepository orderRepository, CartService cartService, DeliveryManRepository deliveryManRepository, PharmacistRepository pharmacistRepository, OrderItemRepository orderItemRepository, PrescriptionRepository prescriptionRepository, ProductRepository productRepository) {
         this.orderRepository = orderRepository;
         this.cartService = cartService;
         this.deliveryManRepository = deliveryManRepository;
         this.pharmacistRepository = pharmacistRepository;
         this.orderItemRepository = orderItemRepository;
         this.prescriptionRepository = prescriptionRepository;
+        this.productRepository = productRepository;
     }
 
 
@@ -68,6 +70,21 @@ public class OrderService {
             if(cartItem.getAddedProduct().isPrescription() && noPrescription){
                 return responseDTOBuilder.ok(false).errors(List.of("You have some products in your cart that need prescription, please attach to the cart.")).build();
             }
+        }
+
+        for (CartItem cartItem : cart.getEntries()){
+            Product product = productRepository.findById(cartItem.getAddedProduct().getId()).get();
+            long remainInStock = product.getStock() - cartItem.getQuantity();
+            if(remainInStock >= 0){
+                product.setStock(remainInStock);
+            }else {
+                return responseDTOBuilder.ok(false).errors(List.of(String.format(" %s still in stock %s items",product.getName(), product.getStock()))).build();
+            }
+
+        }
+
+        if (cartOptional.get().getAddress() == null){
+            return responseDTOBuilder.ok(false).errors(List.of("Cannot find the delivery Address, please add it!")).build();
         }
 
         List<OrderItem> orderItems = cart.getEntries().stream().map(
