@@ -5,6 +5,7 @@ import com.epharmacy.app.dto.response.ResponseDTO;
 import com.epharmacy.app.enums.OrderStatus;
 import com.epharmacy.app.enums.PaymentStatus;
 import com.epharmacy.app.exceptions.DeliveryManNotFoundException;
+import com.epharmacy.app.exceptions.OrderNotFoundException;
 import com.epharmacy.app.exceptions.PharmacistNotFoundException;
 import com.epharmacy.app.mappers.OrderMapper;
 import com.epharmacy.app.model.*;
@@ -133,5 +134,15 @@ public class OrderService {
         OrderDTO dto = OrderMapper.INSTANCE.toDTO(save(savedOrder));
         dto.setNewCartId(cartService.createNewCart(order.getCustomer().getId()).getId());
         return responseDTOBuilder.content(dto).ok(true).build();
+    }
+
+    public void updateStatus(Long orderId, String status) {
+
+        Optional<Order> orderOptional = orderRepository.findById(orderId);
+        if (orderOptional.isEmpty()){
+            throw new OrderNotFoundException(orderId);
+        }
+        orderOptional.get().setOrderStatus(OrderStatus.valueOf(status));
+        save(orderOptional.get());
     }
 }

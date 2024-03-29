@@ -3,10 +3,9 @@ package com.epharmacy.app.restcontroller;
 import com.epharmacy.app.dto.response.ResponseDTO;
 import com.epharmacy.app.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -22,6 +21,11 @@ public class OrderController {
     @PostMapping("/{cartId}/place-order")
     public ResponseDTO placeOrder(@PathVariable Long cartId){
         return orderService.placeOrder(cartId);
+    }
+    @PutMapping("/{orderId}/update-status")
+    public ResponseEntity<HttpStatus> changeOrderStatus(@PathVariable Long orderId, @RequestBody String status){
+        orderService.updateStatus(orderId,status);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 
