@@ -36,7 +36,7 @@ public class Order implements Serializable {
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany/*(mappedBy = "order")*/
     @ToString.Exclude
     private Set<Prescription> prescriptions;
 

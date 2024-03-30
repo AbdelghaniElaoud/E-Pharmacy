@@ -5,16 +5,14 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Getter
 @Setter
 @ToString
 public class PrescriptionDTO {
     private Long id;
-    private LocalDateTime date;
+    private Date date;
     private String doctor;
-    private Long customerId;
-    private Long cartId;
-    private Long imageId;
-    private Long orderId;
+    private String link;
 }

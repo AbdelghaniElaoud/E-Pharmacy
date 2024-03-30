@@ -125,7 +125,7 @@ public class OrderService {
         Order savedOrder = save(order);
         savedOrder.setPrescriptions(cart.getPrescriptions().stream().map(prescription -> {
             prescription.setId(null);
-            prescription.setOrder(savedOrder);
+//            prescription.setOrder(savedOrder);
             return prescriptionRepository.save(prescription);
         }).collect(Collectors.toSet()));
 

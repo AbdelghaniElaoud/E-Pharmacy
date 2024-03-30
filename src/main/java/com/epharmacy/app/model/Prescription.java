@@ -1,16 +1,18 @@
 package com.epharmacy.app.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Setter
 @Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @ToString
 @Table(name = "prescription")
 public class Prescription implements Serializable {
@@ -18,7 +20,7 @@ public class Prescription implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "issue_date", nullable = false)
-    private LocalDateTime date;
+    private Date date;
     @Column(nullable = false)
     private String doctor;
 
@@ -36,8 +38,8 @@ public class Prescription implements Serializable {
     @OneToOne(mappedBy = "prescription")
     private Media media;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    /*@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     @ToString.Exclude
-    private Order order;
+    private Order order;*/
 }
