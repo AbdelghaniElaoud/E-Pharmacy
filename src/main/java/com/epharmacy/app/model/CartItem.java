@@ -32,7 +32,7 @@ public class CartItem implements Serializable {
     @ToString.Exclude
     private Cart cart;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "product_id", nullable = false)
     @ToString.Exclude
     private Product addedProduct;

@@ -41,7 +41,7 @@ public class Product implements Serializable {
     @ToString.Exclude
     private Category category;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.REMOVE)
     @ToString.Exclude
     private List<Media> medias;
 
