@@ -73,16 +73,28 @@ public class OrderService {
             }
         }
 
-        for (CartItem cartItem : cart.getEntries()){
-            Product product = productRepository.findById(cartItem.getAddedProduct().getId()).get();
-            long remainInStock = product.getStock() - cartItem.getQuantity();
-            if(remainInStock >= 0){
-                product.setStock(remainInStock);
-            }else {
-                return responseDTOBuilder.ok(false).errors(List.of(String.format(" %s still in stock %s items",product.getName(), product.getStock()))).build();
+        for (CartItem cartItem : cart.getEntries()) {
+            Optional<Product> optionalProduct = productRepository.findById(cartItem.getAddedProduct().getId());
+            if (optionalProduct.isPresent()) {
+                Product product = optionalProduct.get();
+                long remainInStock = product.getStock() - cartItem.getQuantity();
+                if (remainInStock >= 0) {
+                    product.setStock(remainInStock);
+                    productRepository.save(product);
+                } else {
+                    return responseDTOBuilder
+                            .ok(false)
+                            .errors(List.of(String.format("%s still in stock %s items", product.getName(), product.getStock())))
+                            .build();
+                }
+            } else {
+                return responseDTOBuilder
+                        .ok(false)
+                        .errors(List.of("Product not found"))
+                        .build();
             }
-
         }
+
 
         if (cartOptional.get().getAddress() == null){
             return responseDTOBuilder.ok(false).errors(List.of("Cannot find the delivery Address, please add it!")).build();
