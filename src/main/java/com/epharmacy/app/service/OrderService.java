@@ -124,7 +124,7 @@ public class OrderService {
                 .build();
         Order savedOrder = save(order);
         savedOrder.setPrescriptions(cart.getPrescriptions().stream().map(prescription -> {
-            prescription.setId(null);
+//            prescription.setId(null);
 //            prescription.setOrder(savedOrder);
             return prescriptionRepository.save(prescription);
         }).collect(Collectors.toSet()));
@@ -144,5 +144,15 @@ public class OrderService {
         }
         orderOptional.get().setOrderStatus(OrderStatus.valueOf(status));
         save(orderOptional.get());
+    }
+
+    public List<OrderDTO> getAllOrdersByDeliveryManId(Long deliveryManId) {
+        List<Order> orders = orderRepository.getAllByDeliveryMan_IdAndOrderStatusNot(deliveryManId,OrderStatus.CANCELED);
+        List<OrderDTO> orderDTOS = new ArrayList<>();
+
+        for (Order order:orders) {
+               orderDTOS.add(OrderMapper.INSTANCE.toDTO(order));
+        }
+        return orderDTOS;
     }
 }

@@ -129,13 +129,18 @@ public class CartService {
         if (cartOptional.isEmpty()){
             throw new CartNotFoundException(cartId);
         }
-        for (CartItem cartItem : cartOptional.get().getEntries()){
-            if (cartItem.getAddedProduct().isPrescription()){
-                continue;
-            }else {
-                throw new CartDoesntRequirePrescription(cartId);
+        boolean requiresPrescription = false;
+        for (CartItem cartItem : cartOptional.get().getEntries()) {
+            if (cartItem.getAddedProduct().isPrescription()) {
+                requiresPrescription = true;
+                break;
             }
         }
+
+        if (!requiresPrescription) {
+            throw new CartDoesntRequirePrescription(cartId);
+        }
+
         try {
             String link = mediaService.uploadFile(file);
             Media media = Media.builder().link(link).altText("alt 1").build();

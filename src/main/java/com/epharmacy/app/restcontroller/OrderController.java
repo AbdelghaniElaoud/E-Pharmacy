@@ -1,11 +1,14 @@
 package com.epharmacy.app.restcontroller;
 
+import com.epharmacy.app.dto.order.OrderDTO;
 import com.epharmacy.app.dto.response.ResponseDTO;
 import com.epharmacy.app.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -26,6 +29,11 @@ public class OrderController {
     public ResponseEntity<HttpStatus> changeOrderStatus(@PathVariable Long orderId, @RequestBody String status){
         orderService.updateStatus(orderId,status);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("{deliveryManId}/all-orders")
+    public List<OrderDTO> getAllOrdersByDeliveryManId(@PathVariable Long deliveryManId){
+        return orderService.getAllOrdersByDeliveryManId(deliveryManId);
     }
 
 
