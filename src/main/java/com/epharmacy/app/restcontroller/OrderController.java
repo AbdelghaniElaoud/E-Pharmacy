@@ -36,5 +36,10 @@ public class OrderController {
         return orderService.getAllOrdersByDeliveryManId(deliveryManId);
     }
 
+    @GetMapping("{customerId}/all-canceled-orders")
+    public List<OrderDTO> getAllCanceledOrders(@PathVariable Long customerId){
+        return orderService.getAllCanceledOrders(customerId);
+    }
+
 
 }

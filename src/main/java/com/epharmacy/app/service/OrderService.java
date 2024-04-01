@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -27,10 +28,12 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
     private final PrescriptionRepository prescriptionRepository ;
     private final ProductRepository productRepository ;
+    private final CartItemRepository cartItemRepository;
 
 
     @Autowired
-    public OrderService(OrderRepository orderRepository, CartService cartService, DeliveryManRepository deliveryManRepository, PharmacistRepository pharmacistRepository, OrderItemRepository orderItemRepository, PrescriptionRepository prescriptionRepository, ProductRepository productRepository) {
+    public OrderService(OrderRepository orderRepository, CartService cartService, DeliveryManRepository deliveryManRepository, PharmacistRepository pharmacistRepository, OrderItemRepository orderItemRepository, PrescriptionRepository prescriptionRepository, ProductRepository productRepository,
+                        CartItemRepository cartItemRepository) {
         this.orderRepository = orderRepository;
         this.cartService = cartService;
         this.deliveryManRepository = deliveryManRepository;
@@ -38,6 +41,7 @@ public class OrderService {
         this.orderItemRepository = orderItemRepository;
         this.prescriptionRepository = prescriptionRepository;
         this.productRepository = productRepository;
+        this.cartItemRepository = cartItemRepository;
     }
 
 
@@ -63,6 +67,12 @@ public class OrderService {
         ResponseDTO.ResponseDTOBuilder responseDTOBuilder = ResponseDTO.builder();
         if (cartOptional.isEmpty()){
             return responseDTOBuilder.ok(false).errors(List.of("Could not find your cart")).build();
+        }
+
+        boolean IsThereNoCartItems = cartItemRepository.findAllByCart(cartOptional.get()).isEmpty();
+
+        if (IsThereNoCartItems){
+            return responseDTOBuilder.ok(false).errors(List.of("Your cart is empty please add something to it")).build();
         }
 
         Cart cart = cartOptional.get();
@@ -164,6 +174,16 @@ public class OrderService {
 
         for (Order order:orders) {
                orderDTOS.add(OrderMapper.INSTANCE.toDTO(order));
+        }
+        return orderDTOS;
+    }
+
+    public List<OrderDTO> getAllCanceledOrders(Long customerId) {
+        List<Order> orders = orderRepository.getAllByCustomer_IdAndOrderStatusIn(customerId, Arrays.asList(OrderStatus.CANCELED,OrderStatus.PRESCRIPTION_REFUSED));
+        List<OrderDTO> orderDTOS = new ArrayList<>();
+
+        for (Order order:orders) {
+            orderDTOS.add(OrderMapper.INSTANCE.toDTO(order));
         }
         return orderDTOS;
     }

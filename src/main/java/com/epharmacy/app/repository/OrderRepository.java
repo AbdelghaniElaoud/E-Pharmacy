@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> getAllByDeliveryMan_IdAndOrderStatusNot(Long deliveryManId, OrderStatus orderStatus);
+    List<Order> getAllByCustomer_IdAndOrderStatusIn(Long customerId, List<OrderStatus> orderStatuses);
 }
