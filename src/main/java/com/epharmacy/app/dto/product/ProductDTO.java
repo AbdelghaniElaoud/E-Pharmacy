@@ -17,6 +17,7 @@ public class ProductDTO {
     private BigDecimal price;
     private String code;
     private boolean prescription;
+    private String description;
     private Long stock;
     private CategoryDTO category;
     private List<String> medias;

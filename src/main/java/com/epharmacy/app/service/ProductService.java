@@ -1,7 +1,11 @@
 package com.epharmacy.app.service;
 
+import com.epharmacy.app.dto.product.ProductDTO;
+import com.epharmacy.app.dto.product.ProductRequestDTO;
 import com.epharmacy.app.exceptions.ProductNotFoundException;
+import com.epharmacy.app.mappers.CategoryMapper;
 import com.epharmacy.app.model.CartItem;
+import com.epharmacy.app.model.Category;
 import com.epharmacy.app.model.Product;
 import com.epharmacy.app.repository.CartItemRepository;
 import com.epharmacy.app.repository.ProductRepository;
@@ -50,4 +54,24 @@ public class ProductService {
     public void deleteById(Long id){
         repository.deleteById(id);
     }
+
+    public Product update(Long id, ProductDTO productDTO) {
+        Optional<Product> productOptional = repository.findById(id);
+
+        if (productOptional.isEmpty()){
+            throw new ProductNotFoundException(id);
+        }
+
+        Product product = productOptional.get();
+        product.setCode(productDTO.getCode());
+        product.setName(productDTO.getName());
+        product.setPrice(productDTO.getPrice());
+        product.setStock(productDTO.getStock());
+        product.setDescription(productDTO.getDescription());
+        product.setCategory(CategoryMapper.INSTANCE.toModel(productDTO.getCategory(),new Category()));
+
+        final Product updatedProduct = repository.save(product);
+        return updatedProduct;
+    }
+
 }

@@ -67,4 +67,10 @@ public class ProductController {
     public void deleteProduct(@PathVariable Long productId){
         productService.delete(productId);
     }
+
+    @PutMapping("update-product/{id}")
+    public ProductDTO updateProduct(@PathVariable Long id, @RequestBody ProductDTO productDTO){
+
+        return ProductMapper.INSTANCE.convert(productService.update(id, productDTO));
+    }
 }
