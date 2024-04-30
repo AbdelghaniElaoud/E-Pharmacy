@@ -34,14 +34,14 @@ public class Initializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        Product product = createProduct();
-        anotherOne();
-        anotherOneV1();
-        Customer customer = createCustomer();
-        Cart newCart = cartService.createNewCart(customer.getId());
-        //cartService.addToCart(newCart.getId(), product.getId(), 2L);
-        createDeliveryMan();
-        createPharmacist();
+//        Product product = createProduct();
+//        anotherOne();
+//        anotherOneV1();
+//        Customer customer = createCustomer();
+//        Cart newCart = cartService.createNewCart(customer.getId());
+//        //cartService.addToCart(newCart.getId(), product.getId(), 2L);
+//        createDeliveryMan();
+//        createPharmacist();
     }
 
     private Product anotherOne() {
