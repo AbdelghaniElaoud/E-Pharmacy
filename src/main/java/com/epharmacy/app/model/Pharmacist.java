@@ -22,4 +22,8 @@ public class Pharmacist extends User implements Serializable {
     @OneToMany(mappedBy = "pharmacist")
     @ToString.Exclude
     private Set<Order> orders;
+
+    public Pharmacist(String username, String email, String password) {
+        super(username, email, password);
+    }
 }

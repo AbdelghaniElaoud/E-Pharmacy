@@ -9,7 +9,9 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class Initializer implements CommandLineRunner {
@@ -21,8 +23,9 @@ public class Initializer implements CommandLineRunner {
     private final CustomerService customerService;
     private final DeliveryManService deliveryManService;
     private final PharmacistService pharmacistService;
+    private final RoleService roleService;
 
-    public Initializer(ProductService productService, CategoryService categoryService, MediaService mediaService, CartService cartService, CustomerService customerService, DeliveryManService deliveryManService, PharmacistService pharmacistService) {
+    public Initializer(ProductService productService, CategoryService categoryService, MediaService mediaService, CartService cartService, CustomerService customerService, DeliveryManService deliveryManService, PharmacistService pharmacistService, RoleService roleService) {
         this.productService = productService;
         this.categoryService = categoryService;
         this.mediaService = mediaService;
@@ -30,18 +33,20 @@ public class Initializer implements CommandLineRunner {
         this.customerService = customerService;
         this.deliveryManService = deliveryManService;
         this.pharmacistService = pharmacistService;
+        this.roleService = roleService;
     }
 
     @Override
     public void run(String... args) throws Exception {
-//        Product product = createProduct();
-//        anotherOne();
-//        anotherOneV1();
-//        Customer customer = createCustomer();
-//        Cart newCart = cartService.createNewCart(customer.getId());
-//        //cartService.addToCart(newCart.getId(), product.getId(), 2L);
-//        createDeliveryMan();
-//        createPharmacist();
+        settingTheRolesTable();
+        Product product = createProduct();
+        anotherOne();
+        anotherOneV1();
+        Customer customer = createCustomer();
+        Cart newCart = cartService.createNewCart(customer.getId());
+        //cartService.addToCart(newCart.getId(), product.getId(), 2L);
+        createDeliveryMan();
+        createPharmacist();
     }
 
     private Product anotherOne() {
@@ -119,7 +124,11 @@ Moreover, when seeking the finest in natural wellness, EverHerb Karela Jamun Jui
         customer.setUsername("jaouadel");
         customer.setLastName("El aoud");
         customer.setPassword("1234");
-        customer.setRole(UserRole.CUSTOMER);
+        Role customerRole = roleService.findByName(UserRole.ROLE_CUSTOMER)
+                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+        Set<Role> roles = new HashSet<>();
+        roles.add(customerRole);
+        customer.setRoles(roles);
         customer.setStatus(UserStatus.ACTIVE);
         customer.setEmail("jaouad.elaoud@gmail.com");
         return customerService.save(customer);
@@ -164,7 +173,11 @@ Moreover, when seeking the finest in natural wellness, EverHerb Karela Jamun Jui
         deliveryMan.setUsername("abdel");
         deliveryMan.setLastName("El aoud");
         deliveryMan.setPassword("1234");
-        deliveryMan.setRole(UserRole.DELIVERY_MAN);
+        Role deliveryRole = roleService.findByName(UserRole.ROLE_DELIVERY_MAN)
+                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+        Set<Role> roles = new HashSet<>();
+        roles.add(deliveryRole);
+        deliveryMan.setRoles(roles);
         deliveryMan.setStatus(UserStatus.ACTIVE);
         deliveryMan.setEmail("abdelghani.elaoud@gmail.com");
         return deliveryManService.save(deliveryMan);
@@ -178,9 +191,26 @@ Moreover, when seeking the finest in natural wellness, EverHerb Karela Jamun Jui
         pharmacist.setUsername("paul Pharma");
         pharmacist.setLastName("Dolo");
         pharmacist.setPassword("1234");
-        pharmacist.setRole(UserRole.PHARMACIST);
+        Role pharmacistRole = roleService.findByName(UserRole.ROLE_PHARMACIST)
+                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+        Set<Role> roles = new HashSet<>();
+        roles.add(pharmacistRole);
+        pharmacist.setRoles(roles);
         pharmacist.setStatus(UserStatus.ACTIVE);
         pharmacist.setEmail("paul.pharma@gmail.com");
         return pharmacistService.save(pharmacist);
+    }
+
+    public void settingTheRolesTable(){
+
+        Role admin = new Role(UserRole.ROLE_ADMIN);
+        Role deliveryMan = new Role(UserRole.ROLE_DELIVERY_MAN);
+        Role pharmacist = new Role(UserRole.ROLE_PHARMACIST);
+        Role customer = new Role(UserRole.ROLE_CUSTOMER);
+        roleService.save(admin);
+        roleService.save(deliveryMan);
+        roleService.save(pharmacist);
+        roleService.save(customer);
+
     }
 }

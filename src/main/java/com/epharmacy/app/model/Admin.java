@@ -16,4 +16,7 @@ import java.io.Serializable;
 @Table(name = "admin")
 //@PrimaryKeyJoinColumn(name = "id")
 public class Admin extends User implements Serializable {
+    public Admin(String username, String email, String password) {
+        super(username, email, password);
+    }
 }

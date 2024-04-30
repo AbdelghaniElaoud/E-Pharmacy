@@ -10,6 +10,7 @@ import com.epharmacy.app.service.MediaService;
 import com.epharmacy.app.service.ProductService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,6 +40,7 @@ public class ProductController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('PHARMACIST') or hasRole('ADMIN')")
     public ProductDTO createProduct(@RequestBody ProductDTO productDTO){
         Product product = ProductMapper.INSTANCE.convert(productDTO, categoryService);
         return ProductMapper.INSTANCE.convert(productService.save(product));

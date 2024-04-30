@@ -28,4 +28,7 @@ public class DeliveryMan extends User implements Serializable {
     @ToString.Exclude
     private List<Review> reviews ;
 
+    public DeliveryMan(String username, String email, String password) {
+        super(username, email, password);
+    }
 }

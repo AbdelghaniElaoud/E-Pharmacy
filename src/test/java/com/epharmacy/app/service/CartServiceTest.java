@@ -64,7 +64,7 @@ class CartServiceTest {
         customer.setUsername("jaouadel");
         customer.setLastName("El aoud");
         customer.setPassword("1234");
-        customer.setRole(UserRole.CUSTOMER);
+        customer.setRole(UserRole.ROLE_CUSTOMER);
         customer.setStatus(UserStatus.ACTIVE);
         customer.setEmail("jaouad.elaoud@gmail.com");
         Customer savedCustomer = customerService.save(customer);
