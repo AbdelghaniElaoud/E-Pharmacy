@@ -1,5 +1,6 @@
 package com.epharmacy.app.dto.signupAndSignin.request;
 
+import com.epharmacy.app.model.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -38,6 +39,18 @@ public class SignupRequest {
   private String phone;
   @NotBlank
   private String address;
+
+  // Constructor
+  public SignupRequest(String username, String email, String password, String lastName, String firstName, String phone, String address, Set<String> roles) {
+    this.username = username;
+    this.email = email;
+    this.password = password;
+    this.lastName = lastName;
+    this.firstName = firstName;
+    this.phone = phone;
+    this.address = address;
+    this.role = roles;
+  }
 
   public void setUsername(String username) {
     this.username = username;

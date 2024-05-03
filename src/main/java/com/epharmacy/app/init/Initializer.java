@@ -1,8 +1,13 @@
 package com.epharmacy.app.init;
 
+import com.epharmacy.app.dto.signupAndSignin.request.SignupRequest;
 import com.epharmacy.app.enums.UserRole;
 import com.epharmacy.app.enums.UserStatus;
 import com.epharmacy.app.model.*;
+import com.epharmacy.app.repository.ProductRepository;
+import com.epharmacy.app.repository.RoleRepository;
+import com.epharmacy.app.repository.UserRepository;
+import com.epharmacy.app.restcontroller.AuthController;
 import com.epharmacy.app.service.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -24,8 +29,14 @@ public class Initializer implements CommandLineRunner {
     private final DeliveryManService deliveryManService;
     private final PharmacistService pharmacistService;
     private final RoleService roleService;
+    private final RoleRepository roleRepository;
+    private final ProductRepository productRepository;
+    private final UserRepository userRepository;
 
-    public Initializer(ProductService productService, CategoryService categoryService, MediaService mediaService, CartService cartService, CustomerService customerService, DeliveryManService deliveryManService, PharmacistService pharmacistService, RoleService roleService) {
+    public Initializer(ProductService productService, CategoryService categoryService, MediaService mediaService, CartService cartService, CustomerService customerService, DeliveryManService deliveryManService, PharmacistService pharmacistService, RoleService roleService,
+                       RoleRepository roleRepository,
+                       ProductRepository productRepository,
+                       UserRepository userRepository) {
         this.productService = productService;
         this.categoryService = categoryService;
         this.mediaService = mediaService;
@@ -34,12 +45,20 @@ public class Initializer implements CommandLineRunner {
         this.deliveryManService = deliveryManService;
         this.pharmacistService = pharmacistService;
         this.roleService = roleService;
+        this.roleRepository = roleRepository;
+        this.productRepository = productRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
     public void run(String... args) throws Exception {
-        settingTheRolesTable();
-        Product product = createProduct();
+        if (roleRepository.count() == 0){settingTheRolesTable();
+
+        }
+
+        if (productRepository.count() == 0){
+            Product product = createProduct();
+        }
         anotherOne();
         anotherOneV1();
         Customer customer = createCustomer();
@@ -47,6 +66,25 @@ public class Initializer implements CommandLineRunner {
         //cartService.addToCart(newCart.getId(), product.getId(), 2L);
         createDeliveryMan();
         createPharmacist();
+
+//        createAsignUpRequest();
+    }
+
+    private void createAsignUpRequest() {
+        Set<String > roles = new HashSet<>();
+        roles.add(roleRepository.findByName(UserRole.ROLE_CUSTOMER).get().toString());
+        SignupRequest signupRequest = new SignupRequest(
+                "user",
+                "user@gmail.com",
+                "1234",
+                "user",
+                "user",
+                "0744240259",
+                "9 rue albert bailly, Marcq-en-baroeul",
+                        roles
+        );
+        AuthController authController = new AuthController();
+        authController.registerUser(signupRequest);
     }
 
     private Product anotherOne() {

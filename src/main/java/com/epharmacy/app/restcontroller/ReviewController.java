@@ -6,7 +6,9 @@ import com.epharmacy.app.dto.review.ReviewRequestDTO;
 import com.epharmacy.app.mappers.ReviewMapper;
 import com.epharmacy.app.model.Review;
 import com.epharmacy.app.service.ReviewService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,18 +23,21 @@ public class ReviewController {
 
 
     @PostMapping("")
-    public ResponseEntity addDReview(@RequestBody ReviewRequestDTO reviewRequestDTO) {
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<HttpStatus> addDReview(@RequestBody ReviewRequestDTO reviewRequestDTO) {
         reviewService.createNewReview(reviewRequestDTO);
         return ResponseEntity.ok().build();
     }
     @GetMapping("/{deliveryManId}")
+    @PreAuthorize("hasRole('DELIVERY_MAN')")
     public List<ResponseReviewDTO> getAllValidReviews(@PathVariable Long deliveryManId) {
         List<Review> reviews = reviewService.findAllValidReviewsForDeliveryMan(deliveryManId);
         return  ReviewMapper.INSTANCE.toDTOResponseList(reviews);
     }
 
     @GetMapping("/change-status")
-    public ResponseEntity changeStatus(@RequestBody ChangeStatusReviewRequestDTO changeStatusReviewRequestDTO) {
+    @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
+    public ResponseEntity<HttpStatus> changeStatus(@RequestBody ChangeStatusReviewRequestDTO changeStatusReviewRequestDTO) {
         reviewService.changeStatus(changeStatusReviewRequestDTO);
         return ResponseEntity.ok().build();
     }

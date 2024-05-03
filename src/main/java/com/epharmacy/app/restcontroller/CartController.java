@@ -10,6 +10,7 @@ import com.epharmacy.app.mappers.CartMapper;
 import com.epharmacy.app.model.Cart;
 import com.epharmacy.app.service.CartService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,11 +29,13 @@ public class CartController {
 
 
     @PostMapping("/add-item")
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseDTO addToCart(@RequestBody CartItemRequestDTO cartItem) {
         return cartService.addToCart(cartItem);
     }
 
     @PostMapping("/add-address")
+    @PreAuthorize("hasRole('CUSTOMER')")
     public CartDTO addAddress(@RequestBody AddressDTO addressDTO) {
         return CartMapper.INSTANCE.convert(cartService.addAddress(addressDTO));
     }
@@ -48,6 +51,7 @@ public class CartController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('PHARMACIST') or hasRole('ADMIN')")
     public ResponseDTO getCart(@PathVariable Long id) {
         Optional<Cart> cartOptional = cartService.findById(id);
         if (cartOptional.isEmpty()) {
@@ -57,6 +61,7 @@ public class CartController {
     }
 
     @PostMapping("{cartId}/add-prescription")
+    @PreAuthorize("hasRole('CUSTOMER')")
     public PrescriptionDTO addToCart(@PathVariable Long cartId, @RequestPart PrescriptionRequestDTO prescriptionRequestDTO, @RequestPart MultipartFile file) {
         return cartService.addPrescription(cartId,prescriptionRequestDTO,file);
     }

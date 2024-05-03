@@ -34,6 +34,7 @@ public class ProductController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('PHARMACIST') or hasRole('ADMIN') or hasRole('CUSTOMER')")
     public List<ProductDTO> getAllProducts(){
         List<Product> allActiveProducts = productService.getAllActiveProducts();
         return ProductMapper.INSTANCE.convertAll(allActiveProducts);
@@ -46,6 +47,7 @@ public class ProductController {
         return ProductMapper.INSTANCE.convert(productService.save(product));
     }
     @PostMapping("/{productId}/add-media")
+    @PreAuthorize("hasRole('PHARMACIST') or hasRole('ADMIN')")
     public ProductDTO createProduct(@PathVariable Long productId, MultipartFile file){
         Optional<Product> productOptional = productService.findById(productId);
         if (productOptional.isEmpty()){
@@ -66,11 +68,13 @@ public class ProductController {
         return new ProductDTO();
     }
     @DeleteMapping("{productId}/remove-product")
+    @PreAuthorize("hasRole('PHARMACIST') or hasRole('ADMIN')")
     public void deleteProduct(@PathVariable Long productId){
         productService.delete(productId);
     }
 
     @PutMapping("update-product/{id}")
+    @PreAuthorize("hasRole('PHARMACIST') or hasRole('ADMIN')")
     public ProductDTO updateProduct(@PathVariable Long id, @RequestBody ProductDTO productDTO){
 
         return ProductMapper.INSTANCE.convert(productService.update(id, productDTO));
