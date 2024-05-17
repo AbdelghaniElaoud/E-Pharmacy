@@ -19,17 +19,20 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.epharmacy.app.security.services.UserDetailsImpl.build;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600, allowCredentials="true")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -50,9 +53,16 @@ public class AuthController {
 
   @PostMapping("/signin")
   public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    Optional<User> user = userRepository.findUserByEmail(loginRequest.getEmail());
+    if (user.isEmpty()){
+      return ResponseEntity.ok(new JwtResponse(null,null,null,null,null,false, "User not found"));
+    } else if (!BCrypt.checkpw(loginRequest.getPassword(),user.get().getPassword())) {
+      return ResponseEntity.ok(new JwtResponse(null,null,null,null,null,false, "Invalid password"));
+
+    }
 
     Authentication authentication = authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+        new UsernamePasswordAuthenticationToken(user.get().getUsername(), loginRequest.getPassword()));
 
     SecurityContextHolder.getContext().setAuthentication(authentication);
     String jwt = jwtUtils.generateJwtToken(authentication);
@@ -66,7 +76,7 @@ public class AuthController {
                          userDetails.getId(), 
                          userDetails.getUsername(), 
                          userDetails.getEmail(), 
-                         roles));
+                         roles,true,"Login is successful"));
   }
 
   @PostMapping("/signup")
@@ -99,7 +109,7 @@ public class AuthController {
     Set<String> strRoles = signUpRequest.getRole();
     Set<Role> roles = new HashSet<>();
 
-    if (strRoles == null) {
+    if (strRoles == null || strRoles.isEmpty()) {
       Role userRole = roleRepository.findByName(UserRole.ROLE_CUSTOMER)
           .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
       roles.add(userRole);
@@ -124,8 +134,14 @@ public class AuthController {
           roles.add(adminRole);
 
           break;
+          case "pharmacist":
+          Role pharmacistRole = roleRepository.findByName(UserRole.ROLE_PHARMACIST)
+              .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+          roles.add(pharmacistRole);
+
+          break;
         default:
-          Role userRole = roleRepository.findByName(UserRole.ROLE_PHARMACIST)
+          Role userRole = roleRepository.findByName(UserRole.ROLE_CUSTOMER)
               .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
           roles.add(userRole);
         }
@@ -136,5 +152,10 @@ public class AuthController {
     userRepository.save(user);
 
     return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+  }
+
+  @PostMapping("/signout")
+  public ResponseEntity<?> signOut(){
+    return ResponseEntity.ok(new MessageResponse("User signed out successfully!"));
   }
 }

@@ -5,6 +5,7 @@ import com.epharmacy.app.exceptions.ProductNotFoundException;
 import com.epharmacy.app.mappers.ProductMapper;
 import com.epharmacy.app.model.Media;
 import com.epharmacy.app.model.Product;
+import com.epharmacy.app.repository.ProductRepository;
 import com.epharmacy.app.service.CategoryService;
 import com.epharmacy.app.service.MediaService;
 import com.epharmacy.app.service.ProductService;
@@ -20,24 +21,34 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600, allowCredentials="true")
 @RequestMapping("/api/products")
 @Slf4j
 public class ProductController {
+    private final ProductRepository productRepository;
     private final ProductService productService;
     private final CategoryService categoryService;
     private final MediaService mediaService;
 
-    public ProductController(ProductService productService, CategoryService categoryService, MediaService mediaService) {
+    public ProductController(ProductService productService, CategoryService categoryService, MediaService mediaService,
+                             ProductRepository productRepository) {
         this.productService = productService;
         this.categoryService = categoryService;
         this.mediaService = mediaService;
+        this.productRepository = productRepository;
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('PHARMACIST') or hasRole('ADMIN') or hasRole('CUSTOMER')")
     public List<ProductDTO> getAllProducts(){
         List<Product> allActiveProducts = productService.getAllActiveProducts();
         return ProductMapper.INSTANCE.convertAll(allActiveProducts);
+    }
+
+    @GetMapping("/{productId}")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ProductDTO getProductById(@PathVariable Long productId){
+        Product product = productRepository.findById(productId).get();
+        return ProductMapper.INSTANCE.convert(product);
     }
 
     @PostMapping

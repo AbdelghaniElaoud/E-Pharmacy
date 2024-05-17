@@ -52,22 +52,22 @@ public class Initializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (roleRepository.count() == 0){settingTheRolesTable();
-
-        }
-
-        if (productRepository.count() == 0){
-            Product product = createProduct();
-        }
-        anotherOne();
-        anotherOneV1();
-        Customer customer = createCustomer();
-        Cart newCart = cartService.createNewCart(customer.getId());
-        //cartService.addToCart(newCart.getId(), product.getId(), 2L);
-        createDeliveryMan();
-        createPharmacist();
-
-//        createAsignUpRequest();
+//        if (roleRepository.count() == 0){settingTheRolesTable();
+//
+//        }
+//
+//        if (productRepository.count() == 0){
+//            Product product = createProduct();
+//        }
+//        anotherOne();
+//        anotherOneV1();
+//        Customer customer = createCustomer();
+//        Cart newCart = cartService.createNewCart(customer.getId());
+//        //cartService.addToCart(newCart.getId(), product.getId(), 2L);
+//        createDeliveryMan();
+//        createPharmacist();
+//
+////        createAsignUpRequest();
     }
 
     private void createAsignUpRequest() {
