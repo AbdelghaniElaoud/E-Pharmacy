@@ -2,8 +2,13 @@ package com.epharmacy.app.repository;
 
 import com.epharmacy.app.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -14,4 +19,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Boolean existsByUsername(String username);
 
     Boolean existsByEmail(String email);
+
+    @Query("SELECT u.id FROM User u WHERE u.username = :username")
+    Optional<Long> findUserIdsByUsername(@Param("username") String username);
 }

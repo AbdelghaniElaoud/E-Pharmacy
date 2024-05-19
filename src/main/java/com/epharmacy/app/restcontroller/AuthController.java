@@ -6,8 +6,7 @@ import com.epharmacy.app.dto.signupAndSignin.request.SignupRequest;
 import com.epharmacy.app.dto.signupAndSignin.response.JwtResponse;
 import com.epharmacy.app.dto.signupAndSignin.response.MessageResponse;
 import com.epharmacy.app.enums.UserRole;
-import com.epharmacy.app.model.Role;
-import com.epharmacy.app.model.User;
+import com.epharmacy.app.model.*;
 import com.epharmacy.app.repository.RoleRepository;
 import com.epharmacy.app.repository.UserRepository;
 import com.epharmacy.app.security.jwt.JwtUtils;
@@ -24,6 +23,7 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -94,14 +94,7 @@ public class AuthController {
     }
 
      //Create new user's account
-    User user = new User(signUpRequest.getUsername(),
-               signUpRequest.getEmail(),
-               encoder.encode(signUpRequest.getPassword()));
 
-    user.setFirstName(signUpRequest.getFirstName());
-    user.setLastName(signUpRequest.getLastName());
-    user.setEmail(signUpRequest.getEmail());
-    user.setEmail(signUpRequest.getEmail());
 
 
 
@@ -120,12 +113,35 @@ public class AuthController {
           Role customerRole = roleRepository.findByName(UserRole.ROLE_CUSTOMER)
                   .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
           roles.add(customerRole);
+          Customer user = new Customer(signUpRequest.getUsername(),
+                  signUpRequest.getEmail(),
+                  encoder.encode(signUpRequest.getPassword()));
 
+          user.setFirstName(signUpRequest.getFirstName());
+          user.setLastName(signUpRequest.getLastName());
+          user.setEmail(signUpRequest.getEmail());
+          user.setEmail(signUpRequest.getEmail());
+          user.setAddress(signUpRequest.getAddress());
+          user.setBalance(BigDecimal.valueOf(0));
+          user.setPhone(signUpRequest.getPhone());
+          user.setRoles(roles);
+          userRepository.save(user);
           break;
         case "delivery":
           Role deliveryRole = roleRepository.findByName(UserRole.ROLE_DELIVERY_MAN)
               .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
           roles.add(deliveryRole);
+          DeliveryMan deliveryMan = new DeliveryMan(signUpRequest.getUsername(),
+                  signUpRequest.getEmail(),
+                  encoder.encode(signUpRequest.getPassword()));
+
+          deliveryMan.setFirstName(signUpRequest.getFirstName());
+          deliveryMan.setLastName(signUpRequest.getLastName());
+          deliveryMan.setEmail(signUpRequest.getEmail());
+          deliveryMan.setEmail(signUpRequest.getEmail());
+          deliveryMan.setPhone(signUpRequest.getPhone());
+          deliveryMan.setRoles(roles);
+          userRepository.save(deliveryMan);
 
           break;
         case "admin":
@@ -133,23 +149,58 @@ public class AuthController {
               .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
           roles.add(adminRole);
 
+          Admin admin = new Admin(signUpRequest.getUsername(),
+                  signUpRequest.getEmail(),
+                  encoder.encode(signUpRequest.getPassword()));
+
+          admin.setFirstName(signUpRequest.getFirstName());
+          admin.setLastName(signUpRequest.getLastName());
+          admin.setEmail(signUpRequest.getEmail());
+          admin.setEmail(signUpRequest.getEmail());
+          admin.setRoles(roles);
+          userRepository.save(admin);
+
           break;
           case "pharmacist":
           Role pharmacistRole = roleRepository.findByName(UserRole.ROLE_PHARMACIST)
               .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
           roles.add(pharmacistRole);
 
+            Pharmacist pharmacist = new Pharmacist(signUpRequest.getUsername(),
+                    signUpRequest.getEmail(),
+                    encoder.encode(signUpRequest.getPassword()));
+
+            pharmacist.setFirstName(signUpRequest.getFirstName());
+            pharmacist.setLastName(signUpRequest.getLastName());
+            pharmacist.setEmail(signUpRequest.getEmail());
+            pharmacist.setEmail(signUpRequest.getEmail());
+            pharmacist.setRoles(roles);
+            userRepository.save(pharmacist);
+
           break;
         default:
           Role userRole = roleRepository.findByName(UserRole.ROLE_CUSTOMER)
               .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
           roles.add(userRole);
+          Customer user1 = new Customer(signUpRequest.getUsername(),
+                  signUpRequest.getEmail(),
+                  encoder.encode(signUpRequest.getPassword()));
+
+          user1.setFirstName(signUpRequest.getFirstName());
+          user1.setLastName(signUpRequest.getLastName());
+          user1.setEmail(signUpRequest.getEmail());
+          user1.setEmail(signUpRequest.getEmail());
+          user1.setAddress(signUpRequest.getAddress());
+          user1.setBalance(BigDecimal.valueOf(0));
+          user1.setPhone(signUpRequest.getPhone());
+          user1.setRoles(roles);
+          userRepository.save(user1);
+
         }
       });
     }
 
-    user.setRoles(roles);
-    userRepository.save(user);
+
 
     return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
   }

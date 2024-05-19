@@ -2,18 +2,24 @@ package com.epharmacy.app.restcontroller;
 
 import com.epharmacy.app.dto.address.AddressDTO;
 import com.epharmacy.app.dto.cart.CartDTO;
+import com.epharmacy.app.dto.cart.CartId;
+import com.epharmacy.app.dto.cart.CreateCartDTO;
 import com.epharmacy.app.dto.cartitem.CartItemRequestDTO;
 import com.epharmacy.app.dto.prescription.PrescriptionDTO;
 import com.epharmacy.app.dto.prescription.PrescriptionRequestDTO;
 import com.epharmacy.app.dto.response.ResponseDTO;
+import com.epharmacy.app.exceptions.CustomerAlreadyHasCart;
 import com.epharmacy.app.mappers.CartMapper;
 import com.epharmacy.app.model.Cart;
+import com.epharmacy.app.repository.CartRepository;
+import com.epharmacy.app.repository.UserRepository;
 import com.epharmacy.app.service.CartService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600, allowCredentials="true")
@@ -21,10 +27,16 @@ import java.util.Optional;
 @RequestMapping("/api/carts")
 @Slf4j
 public class CartController {
+    private final UserRepository userRepository;
+    private final CartRepository cartRepository;
     private final CartService cartService;
 
-    public CartController(CartService cartService) {
+    public CartController(CartService cartService,
+                          CartRepository cartRepository,
+                          UserRepository userRepository) {
         this.cartService = cartService;
+        this.cartRepository = cartRepository;
+        this.userRepository = userRepository;
     }
 
 
@@ -41,17 +53,35 @@ public class CartController {
     }
 
     @PostMapping
-    public ResponseDTO create(@RequestBody CartItemRequestDTO cartItem) {
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseDTO create(@RequestBody CreateCartDTO createCartDTO) {
+        ArrayList<Cart> cart = cartRepository.findCartByCustomerId(createCartDTO.getCustomerId());
+        if (!cart.isEmpty()){
+            return ResponseDTO.builder().errors(List.of("The user has already an active cart")).build();
+        }
         try {
-            return ResponseDTO.builder().ok(true).content(CartMapper.INSTANCE.convert(cartService.createNewCart(cartItem.getCustomerId()))).build();
+            return ResponseDTO.builder().ok(true).content(CartMapper.INSTANCE.convert(cartService.createNewCart(createCartDTO.getCustomerId()))).build();
         } catch (Exception e) {
-            log.error("Could not create cart for customer {}", cartItem.getCustomerId());
+            log.error("Could not create cart for customer {}", createCartDTO.getCustomerId());
             return ResponseDTO.builder().errors(List.of(e.getMessage())).build();
         }
     }
 
+    @GetMapping("/get-cart/{customerId}")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseDTO getActiveCartOfCustomer(@PathVariable(name = "customerId") long customerId){
+        Long Id = cartRepository.findActiveCartIdByCustomerId(customerId);
+        CartId cartId = new CartId();
+        if (Id == null){
+            return ResponseDTO.builder().ok(false).errors(List.of("The user has no active cart")).build();
+        }
+        cartId.setId(Id);
+        return ResponseDTO.builder().ok(true).content(cartId).build();
+
+    }
+
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('PHARMACIST') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('PHARMACIST') or hasRole('ADMIN') or hasRole('CUSTOMER')")
     public ResponseDTO getCart(@PathVariable Long id) {
         Optional<Cart> cartOptional = cartService.findById(id);
         if (cartOptional.isEmpty()) {

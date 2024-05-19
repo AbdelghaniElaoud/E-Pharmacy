@@ -14,10 +14,7 @@ import com.epharmacy.app.mappers.CartMapper;
 import com.epharmacy.app.mappers.PrescriptionMapper;
 import com.epharmacy.app.mappers.ProductMapper;
 import com.epharmacy.app.model.*;
-import com.epharmacy.app.repository.CartItemRepository;
-import com.epharmacy.app.repository.CartRepository;
-import com.epharmacy.app.repository.MediaRepository;
-import com.epharmacy.app.repository.PrescriptionRepository;
+import com.epharmacy.app.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -36,6 +33,7 @@ import java.util.UUID;
 @Service
 @Slf4j
 public class CartService {
+    private final UserRepository userRepository;
     private final MediaRepository mediaRepository;
     private final CartRepository repository;
     private final CartItemRepository cartItemRepository;
@@ -46,7 +44,8 @@ public class CartService {
 
     public CartService(CartRepository repository, CartItemRepository cartItemRepository, ProductService productService, CustomerService customerService, MediaService mediaService,
                        PrescriptionRepository prescriptionRepository,
-                       MediaRepository mediaRepository) {
+                       MediaRepository mediaRepository,
+                       UserRepository userRepository) {
         this.repository = repository;
         this.cartItemRepository = cartItemRepository;
         this.productService = productService;
@@ -54,6 +53,7 @@ public class CartService {
         this.mediaService = mediaService;
         this.prescriptionRepository = prescriptionRepository;
         this.mediaRepository = mediaRepository;
+        this.userRepository = userRepository;
     }
 
     public Cart createNewCart(Long customerId){
