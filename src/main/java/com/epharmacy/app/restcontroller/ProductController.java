@@ -45,7 +45,7 @@ public class ProductController {
     }
 
     @GetMapping("/{productId}")
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
     public ProductDTO getProductById(@PathVariable Long productId){
         Product product = productRepository.findById(productId).get();
         return ProductMapper.INSTANCE.convert(product);
@@ -59,7 +59,31 @@ public class ProductController {
     }
     @PostMapping("/{productId}/add-media")
     @PreAuthorize("hasRole('PHARMACIST') or hasRole('ADMIN')")
-    public ProductDTO createProduct(@PathVariable Long productId, MultipartFile file){
+    public ProductDTO addMedia(@PathVariable Long productId, @RequestParam("files") MultipartFile[] files) {
+        Optional<Product> productOptional = productService.findById(productId);
+        if (productOptional.isEmpty()) {
+            throw new ProductNotFoundException(productId);
+        }
+        try {
+            Product product = productOptional.get();
+            List<Media> medias = new ArrayList<>(CollectionUtils.emptyIfNull(product.getMedias()));
+
+            for (MultipartFile file : files) {
+                String link = mediaService.uploadFile(file);
+                Media media = Media.builder().link(link).altText("alt 1").build();
+                medias.add(mediaService.save(media));
+            }
+
+            product.setMedias(medias);
+            Product savedProduct = productService.save(product);
+            return ProductMapper.INSTANCE.convert(savedProduct);
+        } catch (IOException e) {
+            log.error("Could not attach media to product {}", productId, e);
+            throw new RuntimeException("Could not attach media to product", e);
+        }
+    }
+
+    /*public ProductDTO createProduct(@PathVariable Long productId, MultipartFile file){
         Optional<Product> productOptional = productService.findById(productId);
         if (productOptional.isEmpty()){
             throw new ProductNotFoundException(productId);
@@ -77,7 +101,7 @@ public class ProductController {
             log.error("Could not attach media to product {}", productId, e);
         }
         return new ProductDTO();
-    }
+    }*/
     @DeleteMapping("{productId}/remove-product")
     @PreAuthorize("hasRole('PHARMACIST') or hasRole('ADMIN')")
     public void deleteProduct(@PathVariable Long productId){
@@ -89,5 +113,19 @@ public class ProductController {
     public ProductDTO updateProduct(@PathVariable Long id, @RequestBody ProductDTO productDTO){
 
         return ProductMapper.INSTANCE.convert(productService.update(id, productDTO));
+    }
+
+    @PutMapping("show-product/{id}")
+    @PreAuthorize("hasRole('PHARMACIST') or hasRole('ADMIN')")
+    public Boolean showProduct(@PathVariable Long id){
+
+        Product productOptional = productRepository.findById(id).get();
+
+        boolean active = productOptional.isActive();
+
+        productOptional.setActive(!active);
+
+        productRepository.save(productOptional);
+        return productOptional.isActive();
     }
 }
