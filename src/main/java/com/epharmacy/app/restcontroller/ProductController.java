@@ -1,6 +1,7 @@
 package com.epharmacy.app.restcontroller;
 
 import com.epharmacy.app.dto.product.ProductDTO;
+import com.epharmacy.app.dto.product.ProductDTOAdministration;
 import com.epharmacy.app.exceptions.ProductNotFoundException;
 import com.epharmacy.app.mappers.ProductMapper;
 import com.epharmacy.app.model.Media;
@@ -42,6 +43,13 @@ public class ProductController {
     public List<ProductDTO> getAllProducts(){
         List<Product> allActiveProducts = productService.getAllActiveProducts();
         return ProductMapper.INSTANCE.convertAll(allActiveProducts);
+    }
+
+    @GetMapping("/manage")
+    @PreAuthorize("hasRole('PHARMACIST') or hasRole('ADMIN')")
+    public List<ProductDTOAdministration> getAllProductsForAdministration() {
+        List<Product> products = productRepository.findAll();
+        return ProductMapper.INSTANCE.convertAllToAdmin(products);
     }
 
     @GetMapping("/{productId}")

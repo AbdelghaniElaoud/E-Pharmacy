@@ -1,6 +1,7 @@
 package com.epharmacy.app.mappers;
 
 import com.epharmacy.app.dto.product.ProductDTO;
+import com.epharmacy.app.dto.product.ProductDTOAdministration;
 import com.epharmacy.app.exceptions.CategoryNotFoundException;
 import com.epharmacy.app.model.Category;
 import com.epharmacy.app.model.Media;
@@ -23,6 +24,7 @@ public interface ProductMapper {
     @Mapping(source = "medias", target = "medias", ignore = true)
     @Mapping(source = "category", target = "category", ignore = true)
     ProductDTO toDTO(Product product, @MappingTarget ProductDTO productDTO);
+
     @Mapping(source = "medias", target = "medias", ignore = true)
     @Mapping(source = "category", target = "category", ignore = true)
     Product toModel(ProductDTO productDTO, @MappingTarget Product product, @Context CategoryService categoryService);
@@ -35,6 +37,7 @@ public interface ProductMapper {
         productDTO.setMedias(medias);
         productDTO.setCategory(CategoryMapper.INSTANCE.convert(product.getCategory()));
     }
+
     @AfterMapping
     default void afterToModel(ProductDTO productDTO, @MappingTarget Product product , @Context CategoryService categoryService) {
         Long categoryId = productDTO.getCategory().getId();
@@ -45,13 +48,23 @@ public interface ProductMapper {
         product.setCategory(categoryOptional.get());
     }
 
-    public default List<ProductDTO> convertAll(List<Product> products){
+    default List<ProductDTO> convertAll(List<Product> products){
         return products.stream().map(product -> toDTO(product, new ProductDTO())).toList();
     }
-    public default ProductDTO convert(Product item){
+
+    default ProductDTO convert(Product item){
         return toDTO(item, new ProductDTO());
     }
-    public default Product convert(ProductDTO item, CategoryService categoryService){
+
+    default Product convert(ProductDTO item, CategoryService categoryService){
         return toModel(item, new Product(), categoryService);
+    }
+
+    // Add method to convert to ProductDTOAdministration
+    @Mapping(source = "category", target = "category")
+    ProductDTOAdministration toProductDTOAdministration(Product product);
+
+    default List<ProductDTOAdministration> convertAllToAdmin(List<Product> products){
+        return products.stream().map(this::toProductDTOAdministration).toList();
     }
 }
