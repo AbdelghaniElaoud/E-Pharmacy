@@ -1,6 +1,7 @@
 package com.epharmacy.app.security.services;
 
 
+import com.epharmacy.app.enums.UserStatus;
 import com.epharmacy.app.model.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
@@ -26,13 +27,16 @@ public class UserDetailsImpl implements UserDetails {
 
   private Collection<? extends GrantedAuthority> authorities;
 
+  private UserStatus active;
+
   public UserDetailsImpl(Long id, String username, String email, String password,
-      Collection<? extends GrantedAuthority> authorities) {
+      Collection<? extends GrantedAuthority> authorities, UserStatus userStatus) {
     this.id = id;
     this.username = username;
     this.email = email;
     this.password = password;
     this.authorities = authorities;
+    this.active = userStatus;
   }
 
   public static UserDetailsImpl build(User user) {
@@ -45,7 +49,9 @@ public class UserDetailsImpl implements UserDetails {
         user.getUsername(), 
         user.getEmail(),
         user.getPassword(), 
-        authorities);
+        authorities,
+        user.getStatus()
+    );
   }
 
   @Override
@@ -64,6 +70,10 @@ public class UserDetailsImpl implements UserDetails {
   @Override
   public String getPassword() {
     return password;
+  }
+
+  public UserStatus getActive() {
+    return active;
   }
 
   @Override
@@ -88,7 +98,7 @@ public class UserDetailsImpl implements UserDetails {
 
   @Override
   public boolean isEnabled() {
-    return true;
+    return this.active.equals(UserStatus.ACTIVE);
   }
 
   @Override

@@ -1,6 +1,7 @@
 package com.epharmacy.app.mappers;
 
 import com.epharmacy.app.dto.product.ProductDTO;
+
 import com.epharmacy.app.dto.product.ProductDTOAdministration;
 import com.epharmacy.app.exceptions.CategoryNotFoundException;
 import com.epharmacy.app.model.Category;
@@ -28,6 +29,9 @@ public interface ProductMapper {
     @Mapping(source = "medias", target = "medias", ignore = true)
     @Mapping(source = "category", target = "category", ignore = true)
     Product toModel(ProductDTO productDTO, @MappingTarget Product product, @Context CategoryService categoryService);
+
+    @Mapping(source = "category", target = "category")
+    ProductDTOAdministration toProductDTOAdministration(Product product);
 
     @AfterMapping
     default void afterToDTO(Product product, @MappingTarget ProductDTO productDTO) {
@@ -59,10 +63,6 @@ public interface ProductMapper {
     default Product convert(ProductDTO item, CategoryService categoryService){
         return toModel(item, new Product(), categoryService);
     }
-
-    // Add method to convert to ProductDTOAdministration
-    @Mapping(source = "category", target = "category")
-    ProductDTOAdministration toProductDTOAdministration(Product product);
 
     default List<ProductDTOAdministration> convertAllToAdmin(List<Product> products){
         return products.stream().map(this::toProductDTOAdministration).toList();

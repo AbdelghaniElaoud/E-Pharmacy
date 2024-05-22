@@ -6,6 +6,7 @@ import com.epharmacy.app.dto.signupAndSignin.request.SignupRequest;
 import com.epharmacy.app.dto.signupAndSignin.response.JwtResponse;
 import com.epharmacy.app.dto.signupAndSignin.response.MessageResponse;
 import com.epharmacy.app.enums.UserRole;
+import com.epharmacy.app.enums.UserStatus;
 import com.epharmacy.app.model.*;
 import com.epharmacy.app.repository.RoleRepository;
 import com.epharmacy.app.repository.UserRepository;
@@ -58,6 +59,9 @@ public class AuthController {
       return ResponseEntity.ok(new JwtResponse(null,null,null,null,null,false, "User not found"));
     } else if (!BCrypt.checkpw(loginRequest.getPassword(),user.get().getPassword())) {
       return ResponseEntity.ok(new JwtResponse(null,null,null,null,null,false, "Invalid password"));
+
+    }else if (!user.get().getStatus().equals(UserStatus.ACTIVE)) {
+      return ResponseEntity.ok(new JwtResponse(null,null,null,null,null,false, "The account is inactivated please contact us"));
 
     }
 
@@ -124,6 +128,7 @@ public class AuthController {
           user.setAddress(signUpRequest.getAddress());
           user.setBalance(BigDecimal.valueOf(0));
           user.setPhone(signUpRequest.getPhone());
+          user.setStatus(UserStatus.ACTIVE);
           user.setRoles(roles);
           userRepository.save(user);
           break;
@@ -141,6 +146,7 @@ public class AuthController {
           deliveryMan.setEmail(signUpRequest.getEmail());
           deliveryMan.setPhone(signUpRequest.getPhone());
           deliveryMan.setRoles(roles);
+          deliveryMan.setStatus(UserStatus.ACTIVE);
           userRepository.save(deliveryMan);
 
           break;
@@ -158,6 +164,7 @@ public class AuthController {
           admin.setEmail(signUpRequest.getEmail());
           admin.setEmail(signUpRequest.getEmail());
           admin.setRoles(roles);
+          admin.setStatus(UserStatus.ACTIVE);
           userRepository.save(admin);
 
           break;
@@ -175,6 +182,7 @@ public class AuthController {
             pharmacist.setEmail(signUpRequest.getEmail());
             pharmacist.setEmail(signUpRequest.getEmail());
             pharmacist.setRoles(roles);
+            pharmacist.setStatus(UserStatus.ACTIVE);
             userRepository.save(pharmacist);
 
           break;
@@ -194,6 +202,7 @@ public class AuthController {
           user1.setBalance(BigDecimal.valueOf(0));
           user1.setPhone(signUpRequest.getPhone());
           user1.setRoles(roles);
+          user1.setStatus(UserStatus.ACTIVE);
           userRepository.save(user1);
 
         }

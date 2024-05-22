@@ -33,6 +33,7 @@ public class JwtUtils {
         .claim("id",userPrincipal.getId())
         .claim("email",userPrincipal.getEmail())
         .claim("roles", userPrincipal.getAuthorities())
+        .claim("active", userPrincipal.isEnabled())
         .setIssuedAt(new Date())
         .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
         .signWith(key(), SignatureAlgorithm.HS256)
