@@ -93,7 +93,7 @@ public class CartService {
                 .orElse(null);
 
         if (cartItem != null) {
-            cartItem.setQuantity(cartItem.getQuantity() + quantity);
+            cartItem.setQuantity(quantity); // Update the quantity directly
             cartItem.setTotalPrice(product.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
         } else {
             cartItem = CartItem.builder()
