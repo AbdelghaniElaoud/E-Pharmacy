@@ -64,34 +64,52 @@ public class CartService {
         Cart cart = Cart.builder().code(UUID.randomUUID().toString()).active(true).totalPrice(BigDecimal.ZERO).customer(customerOptional.get()).build();
         return save(cart);
     }
-    public ResponseDTO addToCart(Long cartId, Long productId, Long quantity){
+    public ResponseDTO addToCart(Long cartId, Long productId, Long quantity) {
         Optional<Cart> cartOptional = findById(cartId);
         ResponseDTO.ResponseDTOBuilder builder = ResponseDTO.builder();
-        if (cartOptional.isEmpty()){
+        if (cartOptional.isEmpty()) {
             return builder.errors(List.of("Could not find your cart")).build();
         }
         Optional<Product> productOptional = productService.findById(productId);
-        if (productOptional.isEmpty()){
+        if (productOptional.isEmpty()) {
             return builder.errors(List.of("Could not find product " + productId)).build();
         }
         Cart cart = cartOptional.get();
         Product product = productOptional.get();
-        CartItem cartItem = CartItem.builder()
-                .cart(cart)
-                .discount(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP))
-                .addedProduct(product)
-                .basePrice(product.getPrice().setScale(2, RoundingMode.HALF_UP))
-                .totalPrice(product.getPrice().multiply(BigDecimal.valueOf(quantity)).setScale(2, RoundingMode.HALF_UP))
-                .quantity(quantity)
-                .build();
-        CartItem savedCartItem = cartItemRepository.save(cartItem);
-        List<CartItem> entries = new ArrayList<>(CollectionUtils.emptyIfNull(cart.getEntries()));
-//        entries.removeIf(entry-> entry.getAddedProduct().getId().equals(productId));
-        entries.add(savedCartItem);
-        cart.setEntries(entries);
-        cart.setTotalPrice(entries.stream().map(CartItem::getTotalPrice).reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2, RoundingMode.HALF_UP));
+
+        // Check if the cart already contains the product
+        Optional<CartItem> existingCartItemOptional = cart.getEntries().stream()
+                .filter(entry -> entry.getAddedProduct().getId().equals(productId))
+                .findFirst();
+
+        if (existingCartItemOptional.isPresent()) {
+            // Update the existing cart item
+            CartItem existingCartItem = existingCartItemOptional.get();
+            existingCartItem.setQuantity(existingCartItem.getQuantity() + quantity);
+            existingCartItem.setTotalPrice(existingCartItem.getBasePrice().multiply(BigDecimal.valueOf(existingCartItem.getQuantity())).setScale(2, RoundingMode.HALF_UP));
+            cartItemRepository.save(existingCartItem);
+        } else {
+            // Create a new cart item
+            CartItem cartItem = CartItem.builder()
+                    .cart(cart)
+                    .discount(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP))
+                    .addedProduct(product)
+                    .basePrice(product.getPrice().setScale(2, RoundingMode.HALF_UP))
+                    .totalPrice(product.getPrice().multiply(BigDecimal.valueOf(quantity)).setScale(2, RoundingMode.HALF_UP))
+                    .quantity(quantity)
+                    .build();
+            cartItemRepository.save(cartItem);
+            cart.getEntries().add(cartItem);
+        }
+
+        // Update the cart's total price
+        cart.setTotalPrice(cart.getEntries().stream()
+                .map(CartItem::getTotalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP));
         return builder.ok(true).content(CartMapper.INSTANCE.convert(save(cart))).build();
     }
+
 
     public Optional<Cart> findById(Long id){
         return Optional.ofNullable(repository.findByActiveTrueAndId(id));
