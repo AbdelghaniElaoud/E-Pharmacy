@@ -36,4 +36,20 @@ public class CartItem implements Serializable {
     @JoinColumn(name = "product_id", nullable = false)
     @ToString.Exclude
     private Product addedProduct;
+
+    public CartItem(Cart cart, Product product, BigDecimal basePrice, BigDecimal discount, Long quantity) {
+        this.cart = cart;
+        this.addedProduct = product;
+        this.basePrice = basePrice;
+        this.discount = discount;
+        this.quantity = quantity;
+        this.totalPrice = basePrice.multiply(BigDecimal.valueOf(quantity));
+    }
+    public Long getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Long quantity) {
+        this.quantity = quantity;
+    }
 }

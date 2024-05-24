@@ -56,6 +56,92 @@ public class CartService {
         this.userRepository = userRepository;
     }
 
+
+    public ResponseDTO getCartByUserId(Long userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        ResponseDTO.ResponseDTOBuilder builder = ResponseDTO.builder();
+        if (userOptional.isEmpty()) {
+            return builder.errors(List.of("User not found")).ok(false).build();
+        }
+
+        Long cartId = repository.findActiveCartIdByCustomerId(userId);
+        if (cartId == null) {
+            return builder.errors(List.of("No active cart found for user")).ok(false).build();
+        }
+
+        Optional<Cart> cartOptional = repository.findById(cartId);
+        if (cartOptional.isEmpty()) {
+            return builder.errors(List.of("Cart not found")).ok(false).build();
+        }
+
+        Cart cart = cartOptional.get();
+        return builder.ok(true).content(cart).build();
+    }
+
+    public ResponseDTO addToCart(Long cartId, Long productId, Long quantity) {
+        Optional<Cart> cartOptional = repository.findById(cartId);
+        ResponseDTO.ResponseDTOBuilder builder = ResponseDTO.builder();
+        if (cartOptional.isEmpty()) {
+            return builder.errors(List.of("Could not find your cart")).ok(false).build();
+        }
+        Optional<Product> productOptional = productService.findById(productId);
+        if (productOptional.isEmpty()) {
+            return builder.errors(List.of("Could not find product " + productId)).ok(false).build();
+        }
+        Cart cart = cartOptional.get();
+        Product product = productOptional.get();
+
+        CartItem cartItem = cartItemRepository.findByCartAndAddedProduct(cart, product)
+                .orElse(new CartItem(cart, product, product.getPrice(), BigDecimal.ZERO, 0L));
+
+        cartItem.setQuantity(cartItem.getQuantity() + quantity);
+        cartItem.setTotalPrice(cartItem.getBasePrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
+        cartItemRepository.save(cartItem);
+
+        cart.getEntries().add(cartItem); // Ensure cart item is added to cart entries
+        updateCartTotalPrice(cart);
+        repository.save(cart);
+
+        return builder.ok(true).content(CartMapper.INSTANCE.convert(cart)).build();
+    }
+
+    public ResponseDTO removeFromCart(Long cartId, Long productId) {
+        Optional<Cart> cartOptional = repository.findById(cartId);
+        ResponseDTO.ResponseDTOBuilder builder = ResponseDTO.builder();
+        if (cartOptional.isEmpty()) {
+            return builder.errors(List.of("Could not find your cart")).ok(false).build();
+        }
+        Cart cart = cartOptional.get();
+        CartItem cartItem = cart.getEntries().stream()
+                .filter(item -> item.getAddedProduct().getId().equals(productId))
+                .findFirst()
+                .orElse(null);
+        if (cartItem == null) {
+            return builder.errors(List.of("Product not in cart")).ok(false).build();
+        }
+        cart.getEntries().remove(cartItem);
+        cartItemRepository.delete(cartItem);
+
+        updateCartTotalPrice(cart);
+        repository.save(cart);
+
+        return builder.ok(true).content(CartMapper.INSTANCE.convert(cart)).build();
+    }
+
+    public ResponseDTO updateCartItem(Long cartId, Long productId, Long quantity) {
+        if (quantity <= 0) {
+            return removeFromCart(cartId, productId);
+        }
+        return addToCart(cartId, productId, quantity);
+    }
+
+    private void updateCartTotalPrice(Cart cart) {
+        BigDecimal totalPrice = cart.getEntries().stream()
+                .map(CartItem::getTotalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        cart.setTotalPrice(totalPrice);
+    }
+
     public Cart createNewCart(Long customerId){
         Optional<Customer> customerOptional = customerService.findById(customerId);
         if (customerOptional.isEmpty()) {
@@ -64,7 +150,7 @@ public class CartService {
         Cart cart = Cart.builder().code(UUID.randomUUID().toString()).active(true).totalPrice(BigDecimal.ZERO).customer(customerOptional.get()).build();
         return save(cart);
     }
-    public ResponseDTO addToCart(Long cartId, Long productId, Long quantity) {
+    /*public ResponseDTO addToCart(Long cartId, Long productId, Long quantity) {
         Optional<Cart> cartOptional = findById(cartId);
         ResponseDTO.ResponseDTOBuilder builder = ResponseDTO.builder();
         if (cartOptional.isEmpty()) {
@@ -108,7 +194,7 @@ public class CartService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .setScale(2, RoundingMode.HALF_UP));
         return builder.ok(true).content(CartMapper.INSTANCE.convert(save(cart))).build();
-    }
+    }*/
 
 
     public Optional<Cart> findById(Long id){

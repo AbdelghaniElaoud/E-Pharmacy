@@ -1,6 +1,7 @@
 package com.epharmacy.app.repository;
 
 import com.epharmacy.app.model.Cart;
+import com.epharmacy.app.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,4 +16,6 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
     ArrayList<Cart> findCartByCustomerId(Long customerId);
     @Query("SELECT c.id FROM Cart c WHERE c.customer.id = :customerId AND c.active = true")
     Long findActiveCartIdByCustomerId(@Param("customerId") Long customerId);
+
+   /* Optional<Cart> findByUserAndActive(User user, boolean active);*/
 }
