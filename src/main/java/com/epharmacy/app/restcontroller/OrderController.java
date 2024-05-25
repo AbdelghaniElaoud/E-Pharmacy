@@ -34,10 +34,18 @@ public class OrderController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping("{deliveryManId}/all-orders")
+    @GetMapping("{deliveryManId}/all-orders/delivery")
     @PreAuthorize("hasRole('ADMIN') or hasRole('PHARMACIST') or hasRole('DELIVERY_MAN')")
     public List<OrderDTO> getAllOrdersByDeliveryManId(@PathVariable Long deliveryManId){
-        return orderService.getAllOrdersByDeliveryManId(deliveryManId);
+        return orderService.getOrdersForDelivery(deliveryManId);
+    }
+
+
+
+    @GetMapping("{pharmacistId}/all-orders/pharmacist")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('PHARMACIST') or hasRole('DELIVERY_MAN')")
+    public List<OrderDTO> getAllOrdersByPharmacistId(@PathVariable Long pharmacistId){
+        return orderService.getOrdersByPharmacist(pharmacistId);
     }
 
     @GetMapping("{customerId}/all-canceled-orders")

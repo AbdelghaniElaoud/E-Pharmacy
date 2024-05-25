@@ -187,4 +187,33 @@ public class OrderService {
         }
         return orderDTOS;
     }
+
+    public List<OrderDTO> getAllOrdersByPharmacistId(Long pharmacistId) {
+        List<Order> orders = orderRepository.getAllByDeliveryMan_Id(pharmacistId);
+        List<OrderDTO> orderDTOS = new ArrayList<>();
+
+        for (Order order:orders) {
+            orderDTOS.add(OrderMapper.INSTANCE.toDTO(order));
+        }
+        return orderDTOS;
+    }
+
+    public List<OrderDTO> getOrdersByPharmacist(Long pharmacistId) {
+        List<Order> orders = orderRepository.findByPharmacistId(pharmacistId);
+        List<OrderDTO> orderDTOS = new ArrayList<>();
+        for (Order order : orders) {
+            orderDTOS.add(OrderMapper.INSTANCE.toDTO(order));
+        }
+        return orderDTOS;
+    }
+
+    public List<OrderDTO> getOrdersForDelivery(Long deliveryManId) {
+        List<OrderStatus> excludedStatuses = Arrays.asList(OrderStatus.INIT, OrderStatus.CANCELED);
+        List<Order> orders = orderRepository.findByDeliveryManIdAndOrderStatusNotIn(deliveryManId, excludedStatuses);
+        List<OrderDTO> orderDTOS = new ArrayList<>();
+        for (Order order : orders) {
+            orderDTOS.add(OrderMapper.INSTANCE.toDTO(order));
+        }
+        return orderDTOS;
+    }
 }
