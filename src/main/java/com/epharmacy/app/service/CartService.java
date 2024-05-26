@@ -5,10 +5,7 @@ import com.epharmacy.app.dto.cartitem.CartItemRequestDTO;
 import com.epharmacy.app.dto.prescription.PrescriptionDTO;
 import com.epharmacy.app.dto.prescription.PrescriptionRequestDTO;
 import com.epharmacy.app.dto.response.ResponseDTO;
-import com.epharmacy.app.exceptions.CartDoesntRequirePrescription;
-import com.epharmacy.app.exceptions.CartNotFoundException;
-import com.epharmacy.app.exceptions.CustomerNotFoundException;
-import com.epharmacy.app.exceptions.TimeFormatIsNotValid;
+import com.epharmacy.app.exceptions.*;
 import com.epharmacy.app.mappers.CartMapper;
 import com.epharmacy.app.mappers.PrescriptionMapper;
 import com.epharmacy.app.model.*;
@@ -23,10 +20,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -40,9 +34,11 @@ public class CartService {
     private final MediaService mediaService;
     private final PrescriptionRepository prescriptionRepository;
 
+    private final OrderRepository orderRepository;
+
     public CartService(CartRepository repository, CartItemRepository cartItemRepository, ProductService productService, CustomerService customerService, MediaService mediaService,
                        PrescriptionRepository prescriptionRepository,
-                       MediaRepository mediaRepository, UserRepository userRepository) {
+                       MediaRepository mediaRepository, UserRepository userRepository, OrderRepository orderRepository) {
         this.repository = repository;
         this.cartItemRepository = cartItemRepository;
         this.productService = productService;
@@ -51,6 +47,7 @@ public class CartService {
         this.prescriptionRepository = prescriptionRepository;
         this.mediaRepository = mediaRepository;
         this.userRepository = userRepository;
+        this.orderRepository = orderRepository;
     }
 
 
@@ -269,7 +266,9 @@ public class CartService {
                     .media(media)
                     .customer(customerOptional.get())
                     .build();
-            prescriptionRepository.save(prescription);
+            Prescription prescription1 = prescriptionRepository.save(prescription);
+            media.setPrescription(prescription1);
+            mediaRepository.save(media);
             prescriptions.add(prescription);
             return PrescriptionMapper.INSTANCE.toDTO(prescription);
         } catch (IOException e) {

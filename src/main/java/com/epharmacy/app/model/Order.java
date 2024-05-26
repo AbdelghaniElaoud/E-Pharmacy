@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Setter
-@Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -66,5 +64,93 @@ public class Order implements Serializable {
     @PrePersist
     private void init() {
         if (orderStatus == null) orderStatus = OrderStatus.INIT;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public BigDecimal getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice(BigDecimal totalPrice) {
+        this.totalPrice = totalPrice;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public OrderStatus getOrderStatus() {
+        return orderStatus;
+    }
+
+    public void setOrderStatus(OrderStatus orderStatus) {
+        this.orderStatus = orderStatus;
+    }
+
+    public PaymentStatus getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(PaymentStatus paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public Set<Prescription> getPrescriptions() {
+        return prescriptions;
+    }
+
+    public void setPrescriptions(Set<Prescription> prescriptions) {
+        this.prescriptions = prescriptions;
+    }
+
+    public List<OrderItem> getEntries() {
+        return entries;
+    }
+
+    public void setEntries(List<OrderItem> entries) {
+        this.entries = entries;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public DeliveryMan getDeliveryMan() {
+        return deliveryMan;
+    }
+
+    public void setDeliveryMan(DeliveryMan deliveryMan) {
+        this.deliveryMan = deliveryMan;
+    }
+
+    public Pharmacist getPharmacist() {
+        return pharmacist;
+    }
+
+    public void setPharmacist(Pharmacist pharmacist) {
+        this.pharmacist = pharmacist;
+    }
+
+    public List<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(List<Review> reviews) {
+        this.reviews = reviews;
     }
 }

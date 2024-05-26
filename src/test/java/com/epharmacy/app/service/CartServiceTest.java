@@ -48,7 +48,9 @@ class CartServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+/*
         cartService = new CartService(cartRepository, cartItemRepository, productService, customerService, mediaService, prescriptionRepository, mediaRepository);
+*/
 
         when(customerService.save(any(Customer.class))).thenAnswer(invocation -> invocation.getArgument(0));
     }

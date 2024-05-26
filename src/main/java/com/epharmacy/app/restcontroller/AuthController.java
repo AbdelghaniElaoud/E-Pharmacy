@@ -12,6 +12,7 @@ import com.epharmacy.app.repository.RoleRepository;
 import com.epharmacy.app.repository.UserRepository;
 import com.epharmacy.app.security.jwt.JwtUtils;
 import com.epharmacy.app.security.services.UserDetailsImpl;
+import com.epharmacy.app.service.CartService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +52,9 @@ public class AuthController {
 
   @Autowired
   JwtUtils jwtUtils;
+
+  @Autowired
+  CartService cartService;
 
   @PostMapping("/signin")
   public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -130,7 +134,9 @@ public class AuthController {
           user.setPhone(signUpRequest.getPhone());
           user.setStatus(UserStatus.ACTIVE);
           user.setRoles(roles);
-          userRepository.save(user);
+          User customer = userRepository.save(user);
+
+          cartService.createNewCart(customer.getId());
           break;
         case "delivery":
           Role deliveryRole = roleRepository.findByName(UserRole.ROLE_DELIVERY_MAN)

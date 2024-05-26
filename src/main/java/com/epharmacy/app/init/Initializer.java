@@ -24,35 +24,27 @@ public class Initializer implements CommandLineRunner {
     private final ProductService productService;
     private final CategoryService categoryService;
     private final MediaService mediaService;
-    private final CartService cartService;
     private final CustomerService customerService;
     private final DeliveryManService deliveryManService;
     private final PharmacistService pharmacistService;
     private final RoleService roleService;
     private final RoleRepository roleRepository;
-    private final ProductRepository productRepository;
-    private final UserRepository userRepository;
 
-    public Initializer(ProductService productService, CategoryService categoryService, MediaService mediaService, CartService cartService, CustomerService customerService, DeliveryManService deliveryManService, PharmacistService pharmacistService, RoleService roleService,
-                       RoleRepository roleRepository,
-                       ProductRepository productRepository,
-                       UserRepository userRepository) {
+    public Initializer(ProductService productService, CategoryService categoryService, MediaService mediaService, CustomerService customerService, DeliveryManService deliveryManService, PharmacistService pharmacistService, RoleService roleService,
+                       RoleRepository roleRepository) {
         this.productService = productService;
         this.categoryService = categoryService;
         this.mediaService = mediaService;
-        this.cartService = cartService;
         this.customerService = customerService;
         this.deliveryManService = deliveryManService;
         this.pharmacistService = pharmacistService;
         this.roleService = roleService;
         this.roleRepository = roleRepository;
-        this.productRepository = productRepository;
-        this.userRepository = userRepository;
     }
 
     @Override
     public void run(String... args) throws Exception {
-//        if (roleRepository.count() == 0){settingTheRolesTable();
+//        settingTheRolesTable();
 //
 //        }
 //

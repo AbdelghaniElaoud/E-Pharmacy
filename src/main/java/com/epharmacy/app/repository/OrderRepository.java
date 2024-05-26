@@ -2,10 +2,12 @@ package com.epharmacy.app.repository;
 
 import com.epharmacy.app.enums.OrderStatus;
 import com.epharmacy.app.model.Order;
+import com.epharmacy.app.model.Prescription;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {

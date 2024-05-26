@@ -13,10 +13,7 @@ import com.epharmacy.app.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -215,5 +212,9 @@ public class OrderService {
             orderDTOS.add(OrderMapper.INSTANCE.toDTO(order));
         }
         return orderDTOS;
+    }
+
+    public Set<Prescription> getPrescriptionsByOrderId(Long orderId) {
+        return orderRepository.findById(orderId).get().getPrescriptions();
     }
 }
