@@ -22,6 +22,9 @@ public class Media implements Serializable {
     @Column(unique = true, nullable = false)
     private String link;
 
+    @OneToOne(mappedBy = "profilePhoto")
+    private User user;
+
 
     @OneToOne
     @JoinColumn(name = "prescription_id")

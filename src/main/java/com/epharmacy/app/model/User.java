@@ -46,6 +46,10 @@ public class User implements Serializable {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
+    @OneToOne
+    @JoinColumn(name = "profile_photo_id")
+    private Media profilePhoto;
+
     public User(String username, String email, String password) {
         this.email = email;
         this.username = username;

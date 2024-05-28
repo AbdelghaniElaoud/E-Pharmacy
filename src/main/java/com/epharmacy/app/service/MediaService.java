@@ -3,7 +3,9 @@ package com.epharmacy.app.service;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.epharmacy.app.model.Media;
+import com.epharmacy.app.model.User;
 import com.epharmacy.app.repository.MediaRepository;
+import com.epharmacy.app.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,9 +18,12 @@ import java.util.UUID;
 @Service
 public class MediaService {
     private final MediaRepository repository;
+    private final UserRepository userRepository;
 
-    public MediaService(MediaRepository repository) {
+    public MediaService(MediaRepository repository,
+                        UserRepository userRepository) {
         this.repository = repository;
+        this.userRepository = userRepository;
     }
 
     public Optional<Media> findById(Long id){
@@ -56,4 +61,19 @@ public class MediaService {
     }
 
 
+    public User addProfile(Long userId, MultipartFile photo) throws IOException {
+
+        User user = userRepository.findById(userId).get();
+
+
+        String link = uploadFile(photo);
+        Media media = Media.builder().link(link).altText(user.getUsername()).build();
+        save(media);
+        user.setProfilePhoto(media);
+
+        userRepository.save(user);
+
+        return userRepository.save(user);
+
+    }
 }
