@@ -112,4 +112,18 @@ public class OrderController {
         orderService.updateStatus(orderId,"ISSUE");
     }
 
+    @PutMapping("/{orderId}/delivered")
+    @PreAuthorize("hasRole('DELIVERY_MAN')")
+    public void delivered(@PathVariable Long orderId){
+        orderService.delivered(orderId);
+    }
+
+    @PutMapping("/{orderId}/issue-delivery")
+    @PreAuthorize("hasRole('DELIVERY_MAN')")
+    public void issueInDelivery(@PathVariable Long orderId){
+        orderService.issue(orderId);
+    }
+
+
+
 }

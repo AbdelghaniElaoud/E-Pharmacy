@@ -205,7 +205,7 @@ public class OrderService {
     }
 
     public List<OrderDTO> getOrdersForDelivery(Long deliveryManId) {
-        List<OrderStatus> excludedStatuses = Arrays.asList(OrderStatus.INIT, OrderStatus.CANCELED, OrderStatus.PRESCRIPTION_REFUSED, OrderStatus.ISSUE);
+        List<OrderStatus> excludedStatuses = Arrays.asList(OrderStatus.INIT, OrderStatus.CANCELED, OrderStatus.PRESCRIPTION_REFUSED, OrderStatus.ISSUE, OrderStatus.COMPLETED);
         List<Order> orders = orderRepository.findByDeliveryManIdAndOrderStatusNotIn(deliveryManId, excludedStatuses);
         List<OrderDTO> orderDTOS = new ArrayList<>();
         for (Order order : orders) {
@@ -216,5 +216,24 @@ public class OrderService {
 
     public Set<Prescription> getPrescriptionsByOrderId(Long orderId) {
         return orderRepository.findById(orderId).get().getPrescriptions();
+    }
+
+    public void delivered(Long orderId) {
+
+        Order order = orderRepository.findById(orderId).get();
+        order.setOrderStatus(OrderStatus.COMPLETED);
+        order.setPaymentStatus(PaymentStatus.PAID);
+
+        orderRepository.save(order);
+    }
+
+    public void issue(Long orderId) {
+
+        Order order = orderRepository.findById(orderId).get();
+        order.setOrderStatus(OrderStatus.ISSUE);
+        order.setPaymentStatus(PaymentStatus.NOT_PAID);
+
+        orderRepository.save(order);
+
     }
 }
