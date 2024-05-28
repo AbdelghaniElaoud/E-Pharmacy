@@ -3,8 +3,12 @@ package com.epharmacy.app.restcontroller;
 import com.epharmacy.app.dto.order.OrderDTO;
 import com.epharmacy.app.dto.prescription.PrescriptionDTO;
 import com.epharmacy.app.dto.response.ResponseDTO;
+import com.epharmacy.app.mappers.OrderMapper1;
+import com.epharmacy.app.mappers.OrderMapper2;
 import com.epharmacy.app.mappers.PrescriptionMapper;
+import com.epharmacy.app.model.Order;
 import com.epharmacy.app.model.Prescription;
+import com.epharmacy.app.repository.OrderRepository;
 import com.epharmacy.app.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -21,11 +25,14 @@ import java.util.Set;
 @RequestMapping("/api/orders")
 @Slf4j
 public class OrderController {
+    private final OrderRepository orderRepository;
 
     private final OrderService orderService;
 
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService,
+                           OrderRepository orderRepository) {
         this.orderService = orderService;
+        this.orderRepository = orderRepository;
     }
 
     @PostMapping("/{cartId}/place-order")
@@ -74,5 +81,35 @@ public class OrderController {
         return ResponseEntity.ok(prescriptionDTOs);
     }
 
+    @GetMapping("/{orderId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('PHARMACIST')")
+    public ResponseDTO getOrderById(@PathVariable Long orderId){
+        return orderRepository.findById(orderId)
+                .map(order -> ResponseDTO.builder().ok(true).content(OrderMapper1.toOrderDTO(order)).build())
+                .orElseGet(() -> ResponseDTO.builder().ok(false).content("There is no order with the id " + orderId).build());
+    }
+
+    @PutMapping("/{orderId}/confirm-order")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('PHARMACIST')")
+    public ResponseDTO confirm(@PathVariable Long orderId){
+        orderService.updateStatus(orderId,"CONFIRMED");
+        return orderRepository.findById(orderId)
+                .map(order -> ResponseDTO.builder().ok(true).content(OrderMapper2.toOrderDTO(order)).build())
+                .orElseGet(() -> ResponseDTO.builder().ok(false).content("There is no order with the id " + orderId).build());
+
+    }
+
+
+    @PutMapping("/{orderId}/cancel-order")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('PHARMACIST')")
+    public void cancel(@PathVariable Long orderId){
+        orderService.updateStatus(orderId,"CANCELED");
+    }
+
+    @PutMapping("/{orderId}/issue")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('PHARMACIST')")
+    public void issue(@PathVariable Long orderId){
+        orderService.updateStatus(orderId,"ISSUE");
+    }
 
 }

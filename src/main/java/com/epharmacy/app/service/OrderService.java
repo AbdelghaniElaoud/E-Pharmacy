@@ -205,7 +205,7 @@ public class OrderService {
     }
 
     public List<OrderDTO> getOrdersForDelivery(Long deliveryManId) {
-        List<OrderStatus> excludedStatuses = Arrays.asList(OrderStatus.INIT, OrderStatus.CANCELED);
+        List<OrderStatus> excludedStatuses = Arrays.asList(OrderStatus.INIT, OrderStatus.CANCELED, OrderStatus.PRESCRIPTION_REFUSED, OrderStatus.ISSUE);
         List<Order> orders = orderRepository.findByDeliveryManIdAndOrderStatusNotIn(deliveryManId, excludedStatuses);
         List<OrderDTO> orderDTOS = new ArrayList<>();
         for (Order order : orders) {
