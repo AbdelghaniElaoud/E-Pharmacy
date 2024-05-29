@@ -17,6 +17,7 @@ public class UserMapper {
         userDTO.setLastName(user.getLastName());
         userDTO.setFirstName(user.getFirstName());
         userDTO.setUsername(user.getUsername());
+        userDTO.setEmail(user.getEmail());
         userDTO.setCreatedAt(java.sql.Date.valueOf(user.getCreatedAt().toLocalDate()));
         userDTO.setStatus(user.getStatus());
 

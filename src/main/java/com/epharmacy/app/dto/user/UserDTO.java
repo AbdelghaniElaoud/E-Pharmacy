@@ -18,6 +18,7 @@ public class UserDTO {
     private String lastName;
     private String firstName;
     private String username;
+    private String email;
     private Date createdAt;
     private UserRole role;
     private UserStatus status;
