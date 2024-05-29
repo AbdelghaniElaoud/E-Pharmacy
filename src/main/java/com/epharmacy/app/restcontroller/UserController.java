@@ -1,10 +1,12 @@
 package com.epharmacy.app.restcontroller;
 
 import com.epharmacy.app.dto.response.ResponseDTO;
+import com.epharmacy.app.dto.user.UserDTO1;
 import com.epharmacy.app.mappers.UserMapper;
 import com.epharmacy.app.model.User;
 import com.epharmacy.app.repository.UserRepository;
 import com.epharmacy.app.service.MediaService;
+import com.epharmacy.app.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -20,11 +22,13 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final MediaService mediaService;
+    private final UserService userService;
 
     @Autowired
-    public UserController(UserRepository userRepository, MediaService mediaService) {
+    public UserController(UserRepository userRepository, MediaService mediaService, UserService userService) {
         this.userRepository = userRepository;
         this.mediaService = mediaService;
+        this.userService = userService;
     }
 
     @GetMapping("/{username}")
@@ -54,5 +58,11 @@ public class UserController {
             return ResponseDTO.builder().ok(true).content(UserMapper.toUserDTO(user.get())).build();
         }
         return ResponseDTO.builder().ok(false).content("There is no user with this id : "+userId ).build();
+    }
+
+    @PostMapping("/update-profile")
+    @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN') or hasRole('PHARMACIST') or hasRole('DELIVERY_MAN')")
+    public ResponseDTO updateProfile(UserDTO1 user){
+        return ResponseDTO.builder().ok(true).content(UserMapper.toUserDTO(userService.editProfile(user))).build();
     }
 }
