@@ -1,6 +1,7 @@
 package com.epharmacy.app.restcontroller;
 
 import com.epharmacy.app.dto.response.ResponseDTO;
+import com.epharmacy.app.dto.user.UserDTO;
 import com.epharmacy.app.dto.user.UserDTO1;
 import com.epharmacy.app.mappers.UserMapper;
 import com.epharmacy.app.model.User;
@@ -8,11 +9,15 @@ import com.epharmacy.app.repository.UserRepository;
 import com.epharmacy.app.service.MediaService;
 import com.epharmacy.app.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600, allowCredentials="true")
@@ -64,5 +69,16 @@ public class UserController {
     @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN') or hasRole('PHARMACIST') or hasRole('DELIVERY_MAN')")
     public ResponseDTO updateProfile(UserDTO1 user){
         return ResponseDTO.builder().ok(true).content(UserMapper.toUserDTO(userService.editProfile(user))).build();
+    }
+
+    @GetMapping("/non-admins")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseDTO getAllNonAdminUsers() {
+        List<User> users = userService.getAllNonAdminUsers();
+        List<UserDTO> userDTOS = new ArrayList<>();
+        for (User user : users){
+            userDTOS.add(UserMapper.toUserDTO(user));
+        }
+        return ResponseDTO.builder().ok(true).content(userDTOS).build();
     }
 }

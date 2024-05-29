@@ -5,6 +5,8 @@ import com.epharmacy.app.model.User;
 import com.epharmacy.app.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class UserService {
 
@@ -21,5 +23,9 @@ public class UserService {
         user1.setEmail(user.getEmail());
 
         return  userRepository.save(user1);
+    }
+
+    public List<User> getAllNonAdminUsers() {
+        return userRepository.findAllNonAdminUsers();
     }
 }
