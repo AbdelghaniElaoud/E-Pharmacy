@@ -20,7 +20,7 @@ public class UserDTO {
     private String username;
     private String email;
     private Date createdAt;
-    private UserRole role;
+    private String role;
     private UserStatus status;
     private MediaDTO profilePhoto;
 }
