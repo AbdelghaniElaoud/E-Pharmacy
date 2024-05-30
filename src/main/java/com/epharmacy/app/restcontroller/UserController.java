@@ -81,4 +81,11 @@ public class UserController {
         }
         return ResponseDTO.builder().ok(true).content(userDTOS).build();
     }
+
+    @PostMapping("/{userId}/activate")
+    @PreAuthorize("hasRole('ADMIN')")
+    public void activate(@PathVariable Long userId){
+        userService.activateOrDeactivate(userId);
+    }
+
 }
