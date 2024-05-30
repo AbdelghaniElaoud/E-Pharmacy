@@ -189,7 +189,7 @@ public class AuthController {
             pharmacist.setEmail(signUpRequest.getEmail());
             pharmacist.setRoles(roles);
             pharmacist.setStatus(UserStatus.ACTIVE);
-            pharmacist.setPhone("");
+            pharmacist.setPhone(signUpRequest.getPhone());
             userRepository.save(pharmacist);
 
           break;
