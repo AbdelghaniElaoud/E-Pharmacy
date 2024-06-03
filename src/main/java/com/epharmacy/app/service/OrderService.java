@@ -236,4 +236,8 @@ public class OrderService {
         orderRepository.save(order);
 
     }
+
+    public List<Order> findIncompleteOrdersByCustomerId(Long customerId) {
+        return orderRepository.findIncompleteOrdersByCustomerId(customerId);
+    }
 }

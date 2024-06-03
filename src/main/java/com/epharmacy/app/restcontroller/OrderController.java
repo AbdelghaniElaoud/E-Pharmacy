@@ -1,8 +1,10 @@
 package com.epharmacy.app.restcontroller;
 
 import com.epharmacy.app.dto.order.OrderDTO;
+import com.epharmacy.app.dto.order.OrderDTO2;
 import com.epharmacy.app.dto.prescription.PrescriptionDTO;
 import com.epharmacy.app.dto.response.ResponseDTO;
+import com.epharmacy.app.mappers.OrderMapper;
 import com.epharmacy.app.mappers.OrderMapper1;
 import com.epharmacy.app.mappers.OrderMapper2;
 import com.epharmacy.app.mappers.PrescriptionMapper;
@@ -122,6 +124,17 @@ public class OrderController {
     @PreAuthorize("hasRole('DELIVERY_MAN')")
     public void issueInDelivery(@PathVariable Long orderId){
         orderService.issue(orderId);
+    }
+
+    @GetMapping("/{customerId}/incomplete")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<List<OrderDTO2>> getIncompleteOrders(@PathVariable Long customerId) {
+        List<Order> orders = orderService.findIncompleteOrdersByCustomerId(customerId);
+        List<OrderDTO2> orderDTO2s = new ArrayList<>();
+        for (Order order:orders) {
+            orderDTO2s.add(OrderMapper2.toOrderDTO(order));
+        }
+        return new ResponseEntity<>(orderDTO2s, HttpStatus.OK);
     }
 
 
