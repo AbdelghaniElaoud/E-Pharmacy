@@ -87,6 +87,9 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
           auth.requestMatchers("/api/auth/**").permitAll()
               .requestMatchers("/api/test/**").permitAll()
               .requestMatchers("/api/products").permitAll()
+              .requestMatchers("/api/users/{userId}/update-password").permitAll()
+              .requestMatchers("/api/users/update-password-request").permitAll()
+              .requestMatchers("/reset-password").permitAll()
               .anyRequest().authenticated()
         );
     

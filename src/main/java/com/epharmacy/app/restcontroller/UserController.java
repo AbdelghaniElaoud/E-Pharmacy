@@ -1,6 +1,8 @@
 package com.epharmacy.app.restcontroller;
 
 import com.epharmacy.app.dto.response.ResponseDTO;
+import com.epharmacy.app.dto.user.PasswordReset;
+import com.epharmacy.app.dto.user.PasswordResetRequest;
 import com.epharmacy.app.dto.user.UserDTO;
 import com.epharmacy.app.dto.user.UserDTO1;
 import com.epharmacy.app.mappers.UserMapper;
@@ -8,6 +10,7 @@ import com.epharmacy.app.model.User;
 import com.epharmacy.app.repository.UserRepository;
 import com.epharmacy.app.service.MediaService;
 import com.epharmacy.app.service.UserService;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -88,4 +91,14 @@ public class UserController {
         userService.activateOrDeactivate(userId);
     }
 
+
+    @PostMapping("/update-password-request")
+    public ResponseDTO resetRequest(@RequestBody PasswordResetRequest request) throws MessagingException {
+        return ResponseDTO.builder().ok(true).content(userService.updatePasswordRequest(request)).build();
+    }
+
+    @PostMapping("{userId}/update-password")
+    public ResponseDTO reset(@PathVariable Long userId, @RequestBody PasswordReset request) {
+        return ResponseDTO.builder().ok(true).content(userService.updatePassword(userId, request)).build();
+    }
 }
