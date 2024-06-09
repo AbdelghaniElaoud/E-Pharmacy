@@ -197,6 +197,7 @@ public class OrderService {
                 .append("</head>")
                 .append("<body>")
                 .append("<h1>Order Confirmation</h1>")
+                .append("<h2>Order Id").append(items.get(0).getOrderId()).append("</h2>")
                 .append("<div class='summary'>")
                 .append("<h2>SUMMARY OF ORDER TOTAL</h2>")
                 .append("<p>Sub-total: ").append(calculateSubtotal(items)).append(" MAD</p>")
