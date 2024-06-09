@@ -1,6 +1,7 @@
 package com.epharmacy.app.restcontroller;
 
 import com.epharmacy.app.dto.category.CategoryDTO;
+import com.epharmacy.app.dto.category.CategoryDTO1;
 import com.epharmacy.app.mappers.CategoryMapper;
 import com.epharmacy.app.model.Category;
 import com.epharmacy.app.repository.CategoryRepository;
@@ -25,9 +26,10 @@ public class CategoryController {
 
     @GetMapping
     @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN') or hasRole('PHARMACIST')")
-    public List<CategoryDTO> getAllCategories(){
-        List<Category> allActiveProducts = categoryService.getAllCategories();
-        return CategoryMapper.INSTANCE.convertAll(allActiveProducts);
+    public List<CategoryDTO1> getAllCategories(){
+        List<CategoryDTO1> allActiveProducts = categoryService.getAllCategories();
+
+        return allActiveProducts;
     }
 
     @PostMapping
