@@ -12,6 +12,7 @@ import com.epharmacy.app.model.Order;
 import com.epharmacy.app.model.Prescription;
 import com.epharmacy.app.repository.OrderRepository;
 import com.epharmacy.app.service.OrderService;
+import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +45,7 @@ public class OrderController {
     }
     @PutMapping("/{orderId}/update-status")
     @PreAuthorize("hasRole('PHARMACIST') or hasRole('DELIVERY_MAN')")
-    public ResponseEntity<HttpStatus> changeOrderStatus(@PathVariable Long orderId, @RequestBody String status){
+    public ResponseEntity<HttpStatus> changeOrderStatus(@PathVariable Long orderId, @RequestBody String status) throws MessagingException {
         orderService.updateStatus(orderId,status);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -93,7 +94,7 @@ public class OrderController {
 
     @PutMapping("/{orderId}/confirm-order")
     @PreAuthorize("hasRole('ADMIN') or hasRole('PHARMACIST')")
-    public ResponseDTO confirm(@PathVariable Long orderId){
+    public ResponseDTO confirm(@PathVariable Long orderId) throws MessagingException {
         orderService.updateStatus(orderId,"CONFIRMED");
         return orderRepository.findById(orderId)
                 .map(order -> ResponseDTO.builder().ok(true).content(OrderMapper2.toOrderDTO(order)).build())
@@ -104,13 +105,13 @@ public class OrderController {
 
     @PutMapping("/{orderId}/cancel-order")
     @PreAuthorize("hasRole('ADMIN') or hasRole('PHARMACIST')")
-    public void cancel(@PathVariable Long orderId){
+    public void cancel(@PathVariable Long orderId) throws MessagingException {
         orderService.updateStatus(orderId,"CANCELED");
     }
 
     @PutMapping("/{orderId}/issue")
     @PreAuthorize("hasRole('ADMIN') or hasRole('PHARMACIST')")
-    public void issue(@PathVariable Long orderId){
+    public void issue(@PathVariable Long orderId) throws MessagingException {
         orderService.updateStatus(orderId,"ISSUE");
     }
 

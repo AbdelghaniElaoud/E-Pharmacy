@@ -1,18 +1,22 @@
 package com.epharmacy.app.service;
 
 import com.epharmacy.app.dto.order.OrderDTO;
+import com.epharmacy.app.dto.orderitem.OrderItemDTO;
 import com.epharmacy.app.dto.response.ResponseDTO;
 import com.epharmacy.app.enums.OrderStatus;
 import com.epharmacy.app.enums.PaymentStatus;
 import com.epharmacy.app.exceptions.DeliveryManNotFoundException;
 import com.epharmacy.app.exceptions.OrderNotFoundException;
 import com.epharmacy.app.exceptions.PharmacistNotFoundException;
+import com.epharmacy.app.mappers.OrderItemMapper;
 import com.epharmacy.app.mappers.OrderMapper;
 import com.epharmacy.app.model.*;
 import com.epharmacy.app.repository.*;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,10 +31,12 @@ public class OrderService {
     private final ProductRepository productRepository ;
     private final CartItemRepository cartItemRepository;
 
+    private final EmailSenderService emailSenderService;
+
 
     @Autowired
     public OrderService(OrderRepository orderRepository, CartService cartService, DeliveryManRepository deliveryManRepository, PharmacistRepository pharmacistRepository, OrderItemRepository orderItemRepository, PrescriptionRepository prescriptionRepository, ProductRepository productRepository,
-                        CartItemRepository cartItemRepository) {
+                        CartItemRepository cartItemRepository, EmailSenderService emailSenderService) {
         this.orderRepository = orderRepository;
         this.cartService = cartService;
         this.deliveryManRepository = deliveryManRepository;
@@ -39,6 +45,7 @@ public class OrderService {
         this.prescriptionRepository = prescriptionRepository;
         this.productRepository = productRepository;
         this.cartItemRepository = cartItemRepository;
+        this.emailSenderService = emailSenderService;
     }
 
 
@@ -155,7 +162,7 @@ public class OrderService {
         return responseDTOBuilder.content(dto).ok(true).build();
     }
 
-    public void updateStatus(Long orderId, String status) {
+    public void updateStatus(Long orderId, String status) throws MessagingException {
 
         Optional<Order> orderOptional = orderRepository.findById(orderId);
         if (orderOptional.isEmpty()){
@@ -163,7 +170,78 @@ public class OrderService {
         }
         orderOptional.get().setOrderStatus(OrderStatus.valueOf(status));
         save(orderOptional.get());
+
+        List<OrderItemDTO> items = OrderItemMapper.INSTANCE.convertAll(orderOptional.get().getEntries());
+
+        // Generate HTML content for the email
+        String htmlContent = generateHtmlContent(items);
+
+        // Send the email with the generated HTML content
+        emailSenderService.sendHtmlEmail(orderOptional.get().getCustomer().getEmail(), "Order Confirmation", htmlContent);
     }
+
+    private String generateHtmlContent(List<OrderItemDTO> items) {
+        StringBuilder htmlBuilder = new StringBuilder();
+
+        htmlBuilder.append("<html>")
+                .append("<head>")
+                .append("<style>")
+                .append("body { font-family: Arial, sans-serif; }")
+                .append(".summary { margin-bottom: 20px; }")
+                .append(".summary, .card, .footer { border: 1px solid #ddd; padding: 15px; margin: 15px; }")
+                .append(".card img { max-width: 100px; }")
+                .append(".card-content { display: flex; flex-direction: column; }")
+                .append(".card-title { font-weight: bold; }")
+                .append(".footer { background-color: black; color: white; text-align: center; font-size: 12px; padding: 15px; margin: 15px; }")                .append(".social-icons img { max-width: 30px; margin: 5px; }")
+                .append("</style>")
+                .append("</head>")
+                .append("<body>")
+                .append("<h1>Order Confirmation</h1>")
+                .append("<div class='summary'>")
+                .append("<h2>SUMMARY OF ORDER TOTAL</h2>")
+                .append("<p>Sub-total: ").append(calculateSubtotal(items)).append(" MAD</p>")
+                .append("<p>Total Savings: 0.00 MAD</p>")
+                .append("<p>Delivery: 0.00 MAD</p>")
+                .append("<p>Total: ").append(calculateTotal(items)).append(" MAD</p>")
+                .append("</div>");
+
+        for (OrderItemDTO item : items) {
+            htmlBuilder.append("<div class='card'>")
+                    .append("<div class='card-content'>")
+                    .append("<img src='").append(item.getProduct().getMedias().get(0)).append("'>")
+                    .append("<div class='card-title'>").append(item.getProduct().getName()).append("</div>")
+                    .append("<div class='card-price'>Price: ").append(item.getProduct().getPrice()).append(" MAD </div>")
+                    .append("</div>")
+                    .append("</div>");
+        }
+
+        htmlBuilder.append("<div class='footer' >")
+                .append("<p>Once again, thank you for shopping with us.</p>")
+                .append("<p>If you have any questions, please contact our customer service.</p>")
+                .append("<div class='social-icons'>")
+                .append("<a href='#'><i class=\"fab fa-facebook-f\"></i></a>")
+                .append("<a href='#'><i class=\"fab fa-twitter\"></i></a>")
+                .append("<a href='#'><i class=\"fab fa-linkedin-in\"></i></a>")
+                .append("</div>")
+                .append("<p>© 2024 E-Pharmacy. All rights reserved.</p>")
+                .append("</div>")
+                .append("</body>")
+                .append("</html>");
+
+        return htmlBuilder.toString();
+    }
+
+    private BigDecimal calculateSubtotal(List<OrderItemDTO> items) {
+        return items.stream()
+                .map(item -> item.getProduct().getPrice())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+
+    private BigDecimal calculateTotal(List<OrderItemDTO> items) {
+        return calculateSubtotal(items);
+    }
+
 
     public List<OrderDTO> getAllOrdersByDeliveryManId(Long deliveryManId) {
         List<Order> orders = orderRepository.getAllByDeliveryMan_IdAndOrderStatusNot(deliveryManId,OrderStatus.CANCELED);
